@@ -19,8 +19,11 @@
 
 package org.switchyard.deploy;
 
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javax.xml.namespace.QName;
 
@@ -70,16 +73,21 @@ public class ServiceDomainManager {
     
     private static Logger _log = Logger.getLogger(ServiceDomainManager.class);
 
-    // Share the same service registry and event manager across domains
-    // to give visibility to registered services across application domains
-    private ServiceRegistry _registry = new DefaultServiceRegistry();
+    // Share the same service registry and bus across domains to give visibility 
+    // to registered services across application domains
+    private ServiceRegistry _registry;
     private EventManager _eventManager = new EventManager();
-
-    /**
-     * Constructs a new ServiceDomainManager.
-     */
-    public ServiceDomainManager() {}
-
+    private Map<QName, WeakReference<ServiceDomain>> _domains = 
+            new HashMap<QName, WeakReference<ServiceDomain>>();
+    
+    public ServiceDomainManager() {
+        _registry = new DefaultServiceRegistry();
+    }
+    
+    public ServiceDomainManager(ServiceRegistry registry) {
+        _registry = registry;
+    }
+    
     /**
      * Create a ServiceDomain instance.
      * <p/>
@@ -96,7 +104,12 @@ public class ServiceDomainManager {
      * @param switchyardConfig The SwitchYard configuration.
      * @return The ServiceDomain instance.
      */
-    public ServiceDomain createDomain(QName domainName, SwitchYardModel switchyardConfig) {
+    public synchronized ServiceDomain createDomain(QName domainName, SwitchYardModel switchyardConfig) {
+        ServiceDomain domain = getDomain(domainName);
+        if (domain != null) {
+            return domain;
+        }
+        
         ServiceSecurity serviceSecurity = getServiceSecurity(switchyardConfig);
         TransformerRegistry transformerRegistry = new BaseTransformerRegistry();
         ValidatorRegistry validatorRegistry = new BaseValidatorRegistry();
@@ -104,14 +117,24 @@ public class ServiceDomainManager {
         SwitchYardCamelContext camelContext = new SwitchYardCamelContext();
         CamelExchangeBus bus = new CamelExchangeBus(camelContext);
 
-        DomainImpl domain = new DomainImpl(
+        domain = new DomainImpl(
                 domainName, serviceSecurity, _registry, bus, transformerRegistry, validatorRegistry, _eventManager);
         camelContext.setServiceDomain(domain);
 
         if (switchyardConfig != null) {
             domain.getHandlers().addAll(getDomainHandlers(switchyardConfig.getDomain()));
         }
+        _domains.put(domainName, new WeakReference<ServiceDomain>(domain));
 
+        return domain;
+    }
+    
+    public ServiceDomain getDomain(QName domainName) {
+        ServiceDomain domain = null;
+        if (_domains.containsKey(domainName)) {
+            domain = _domains.get(domainName).get();
+        }
+        
         return domain;
     }
     

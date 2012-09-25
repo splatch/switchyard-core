@@ -63,7 +63,7 @@ public final class ExchangeSerializationTests {
         msg = serDeser(msg, DefaultMessage.class);
         assertMessage(msg);
     }
-
+    
     private DefaultContext buildContext(DefaultContext ctx) {
         if (ctx == null) {
             ctx = new DefaultContext();

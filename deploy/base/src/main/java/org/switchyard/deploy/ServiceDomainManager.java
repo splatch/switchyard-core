@@ -138,6 +138,23 @@ public class ServiceDomainManager {
         return domain;
     }
     
+    // This is a vicious dirty hack to work around the fact that applications cannot share
+    // a domain today.  This method should be removed once that support is in place.
+    public ServiceDomain getDomainForService(QName serviceName) {
+        // prevent concurrent update to domain list
+        synchronized(_domains) {
+            for (WeakReference<ServiceDomain> ref : _domains.values()) {
+                ServiceDomain domain = ref.get();
+                if (domain != null && !domain.getServices(serviceName).isEmpty()) {
+                    return domain;
+                }
+            }
+        }
+        
+        // nothing found
+        return null;
+    }
+    
     private ServiceSecurity getServiceSecurity(SwitchYardModel switchyard) {
         DefaultServiceSecurity serviceSecurity = new DefaultServiceSecurity();
         if (switchyard != null) {

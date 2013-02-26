@@ -29,10 +29,15 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>switchyard-deploy</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>SwitchYard: Deploy </name>
     <description>The Deploy SPI.</description>
     <url>http://switchyard.org</url>
+
+    <properties>
+        <osgi.export>org.switchyard.deploy*</osgi.export>
+    </properties>
+
     <dependencies>
         <!-- internal dependencies -->
         <dependency>
@@ -81,4 +86,19 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                   <instructions>
+                       <SPI-Consumer>*</SPI-Consumer>
+                   </instructions>
+                </configuration>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

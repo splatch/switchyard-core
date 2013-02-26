@@ -28,11 +28,23 @@
         <version>0.8.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
+
     <artifactId>switchyard-transform</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>SwitchYard: Transform</name>
     <description>The SwitchYard Transform library.</description>
     <url>http://switchyard.org</url>
+
+    <properties>
+        <osgi.import>
+            org.codehaus.jackson*;resolution:=optional,
+            org.milyn*;resolution:=optional,
+            org.switchyard.config.model,
+            *
+        </osgi.import>
+        <osgi.export>org.switchyard.transformatio*</osgi.export>
+    </properties>
+
     <dependencies>
         <!-- internal dependencies -->
         <dependency>
@@ -109,4 +121,14 @@
             <artifactId>mvel2</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

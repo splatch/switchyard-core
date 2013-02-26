@@ -23,16 +23,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <artifactId>switchyard-common</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>SwitchYard: Common</name>
     <description>The SwitchYard Common Library.</description>
     <url>http://switchyard.org</url>
+
     <parent>
         <groupId>org.switchyard</groupId>
         <artifactId>switchyard-core-parent</artifactId>
         <version>0.8.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
+
+    <properties>
+        <osgi.export>org.switchyard.common.*</osgi.export>
+    </properties>
+
     <dependencies>
         <!-- external dependencies -->
         <dependency>
@@ -40,4 +46,14 @@
             <artifactId>log4j</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

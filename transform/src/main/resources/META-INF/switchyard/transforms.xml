@@ -25,68 +25,68 @@
 
     <!-- From DOM Transformations... -->
 
-    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:org.w3c.dom.Element" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:org.w3c.dom.Document"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:org.w3c.dom.Element" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:org.w3c.dom.Document"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:java.lang.String" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:java.lang.String"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:java.lang.String" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:java.lang.String"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:char[]" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:char[]"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:char[]" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:char[]"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:java.io.Reader" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:java.io.Reader"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:java.io.Reader" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:java.io.Reader"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:java.io.InputStream" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:java.io.InputStream"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:java.io.InputStream" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:java.io.InputStream"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:org.xml.sax.InputSource" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:org.xml.sax.InputSource"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Document" to="java:org.xml.sax.InputSource" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.w3c.dom.Element" to="java:org.xml.sax.InputSource"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
     <!-- To DOM Transformations... -->
 
-    <trfm:transform.java from="java:java.lang.String" to="java:org.w3c.dom.Document" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:java.lang.String" to="java:org.w3c.dom.Element"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:java.lang.String" to="java:org.w3c.dom.Node"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:java.lang.String" to="java:javax.xml.transform.dom.DOMSource"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:java.lang.String" to="java:org.w3c.dom.Document" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:java.lang.String" to="java:org.w3c.dom.Element"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:java.lang.String" to="java:org.w3c.dom.Node"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:java.lang.String" to="java:javax.xml.transform.dom.DOMSource"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:java.io.Reader" to="java:org.w3c.dom.Document" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:java.io.Reader" to="java:org.w3c.dom.Element"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:java.io.Reader" to="java:org.w3c.dom.Document" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:java.io.Reader" to="java:org.w3c.dom.Element"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:java.io.InputStream" to="java:org.w3c.dom.Node" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:java.io.InputStream" to="java:org.w3c.dom.Document" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:java.io.InputStream" to="java:org.w3c.dom.Element"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:java.io.InputStream" to="java:org.w3c.dom.Node" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:java.io.InputStream" to="java:org.w3c.dom.Document" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:java.io.InputStream" to="java:org.w3c.dom.Element"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:org.xml.sax.InputSource" to="java:org.w3c.dom.Document" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:org.xml.sax.InputSource" to="java:org.w3c.dom.Element"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.xml.sax.InputSource" to="java:org.w3c.dom.Document" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:org.xml.sax.InputSource" to="java:org.w3c.dom.Element"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:char[]" to="java:org.w3c.dom.Document" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:char[]" to="java:org.w3c.dom.Element"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:char[]" to="java:org.w3c.dom.Document" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:char[]" to="java:org.w3c.dom.Element"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
-    <trfm:transform.java from="java:byte[]" to="java:org.w3c.dom.Document" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:byte[]" to="java:org.w3c.dom.Element"  class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:byte[]" to="java:org.w3c.dom.Document" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:byte[]" to="java:org.w3c.dom.Element"  class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
     
-    <trfm:transform.java from="java:javax.xml.transform.dom.DOMSource" to="java:org.w3c.dom.Node" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:javax.xml.transform.dom.DOMSource" to="java:org.w3c.dom.Element" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
-    <trfm:transform.java from="java:javax.xml.transform.dom.DOMSource" to="java:java.lang.String" class="org.switchyard.transform.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:javax.xml.transform.dom.DOMSource" to="java:org.w3c.dom.Node" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:javax.xml.transform.dom.DOMSource" to="java:org.w3c.dom.Element" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
+    <trfm:transform.java from="java:javax.xml.transform.dom.DOMSource" to="java:java.lang.String" class="org.switchyard.transformation.ootb.xml.BasicDOMTransformer"/>
 
     <!-- String transforms... -->
-    <trfm:transform.java from="java:java.lang.String" to="*" class="org.switchyard.transform.ootb.lang.StringTransforms" />
-    <trfm:transform.java from="java:byte[]" to="java:java.lang.String" class="org.switchyard.transform.ootb.lang.ByteArrayToStringTransformer"/> 
+    <trfm:transform.java from="java:java.lang.String" to="*" class="org.switchyard.transformation.ootb.lang.StringTransforms" />
+    <trfm:transform.java from="java:byte[]" to="java:java.lang.String" class="org.switchyard.transformation.ootb.lang.ByteArrayToStringTransformer"/> 
 
     <!-- Number transforms... -->
-    <trfm:transform.java from="java:java.lang.Number" to="*" class="org.switchyard.transform.ootb.lang.NumberTransforms" />
+    <trfm:transform.java from="java:java.lang.Number" to="*" class="org.switchyard.transformation.ootb.lang.NumberTransforms" />
 
     <!-- Exception transforms... -->
-    <trfm:transform.java from="java:java.lang.Throwable" to="java:java.lang.String" class="org.switchyard.transform.ootb.lang.ExceptionTransforms" />
+    <trfm:transform.java from="java:java.lang.Throwable" to="java:java.lang.String" class="org.switchyard.transformation.ootb.lang.ExceptionTransforms" />
 
     <!-- Reader transforms... -->
-    <trfm:transform.java from="java:java.io.Reader" to="*" class="org.switchyard.transform.ootb.io.ReaderTransforms" />
+    <trfm:transform.java from="java:java.io.Reader" to="*" class="org.switchyard.transformation.ootb.io.ReaderTransforms" />
 
     <!-- InputStream transforms... -->
-    <trfm:transform.java from="java:java.io.InputStream" to="*" class="org.switchyard.transform.ootb.io.InputStreamTransforms" />
+    <trfm:transform.java from="java:java.io.InputStream" to="*" class="org.switchyard.transformation.ootb.io.InputStreamTransforms" />
 
     <!-- InputSource transforms... -->
-    <trfm:transform.java from="java:org.xml.sax.InputSource" to="*" class="org.switchyard.transform.ootb.io.InputSourceTransforms" />
+    <trfm:transform.java from="java:org.xml.sax.InputSource" to="*" class="org.switchyard.transformation.ootb.io.InputSourceTransforms" />
 
 </transforms>

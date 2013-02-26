@@ -29,10 +29,15 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
     <artifactId>switchyard-security-jboss</artifactId>
-    <packaging>jar</packaging>
+    <packaging>bundle</packaging>
     <name>SwitchYard: Security - JBoss</name>
     <description>The JBoss security library.</description>
     <url>http://switchyard.org</url>
+
+    <properties>
+        <osgi.export>org</osgi.export>
+    </properties>
+
     <dependencies>
         <!-- internal dependencies -->
         <dependency>
@@ -61,4 +66,14 @@
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

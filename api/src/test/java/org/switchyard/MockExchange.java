@@ -124,4 +124,10 @@ public class MockExchange implements Exchange {
         _provider = provider;
         return this;
     }
+
+    @Override
+    public ExchangeHandler getReplyHandler() {
+        return null;
+    }
+
 }

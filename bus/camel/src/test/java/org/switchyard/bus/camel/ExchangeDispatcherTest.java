@@ -22,10 +22,12 @@
 
 package org.switchyard.bus.camel;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 import javax.xml.namespace.QName;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.switchyard.BaseHandler;
@@ -37,7 +39,6 @@ import org.switchyard.Service;
 import org.switchyard.ServiceDomain;
 import org.switchyard.ServiceReference;
 import org.switchyard.common.camel.SwitchYardCamelContext;
-import org.switchyard.internal.ExchangeImpl;
 import org.switchyard.internal.ServiceReferenceImpl;
 import org.switchyard.metadata.InOnlyService;
 import org.switchyard.metadata.InOutService;
@@ -46,7 +47,8 @@ import org.switchyard.spi.Dispatcher;
 
 public class ExchangeDispatcherTest {
 
-    private ServiceDomain _domain;
+    private static final String REQUEST = "REQUEST";
+	private ServiceDomain _domain;
     private CamelExchangeBus _provider;
     private SwitchYardCamelContext _camelContext;
 
@@ -71,19 +73,21 @@ public class ExchangeDispatcherTest {
         Service service = new MockService(name, new InOnlyService(), sink);
         ServiceReference reference = new ServiceReferenceImpl(name, new InOnlyService(), null);
         Dispatcher dispatch = _provider.createDispatcher(reference);
-        
-        ExchangeImpl exchange = new ExchangeImpl(_domain);
+
+        Exchange exchange = dispatch.createExchange(null);
         exchange.consumer(reference, reference.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.provider(service, service.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
-        exchange.setOutputDispatcher(dispatch);
-        exchange.send(exchange.createMessage());
+        exchange.send(exchange.createMessage().setContent(REQUEST));
         Thread.sleep(200);
-        
-        Assert.assertEquals(
-                exchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN), 
-                sink.getLastExchange().getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN));
+
+        Exchange lastExchange = sink.getLastExchange();
+        assertEquals(REQUEST, exchange.getMessage().getContent());
+
+        assertEquals(
+            exchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN), 
+            lastExchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN)
+        );
     }
-    
 
     @Test
     public void testDispatchInOut() throws Exception {
@@ -92,22 +96,26 @@ public class ExchangeDispatcherTest {
         ExchangeSink inHandler = new ExchangeSink(true);
         // consumer handler
         ExchangeSink outHandler = new ExchangeSink();
-        
+
         Service service = new MockService(name, new InOutService(), inHandler);
         ServiceReference reference = new ServiceReferenceImpl(name, new InOutService(), null);
         Dispatcher dispatch = _provider.createDispatcher(reference);
-        
-        ExchangeImpl exchange = new ExchangeImpl(_domain, outHandler);
+
+        Exchange exchange = dispatch.createExchange(outHandler);
         exchange.consumer(reference, reference.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.provider(service, service.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
-        exchange.setOutputDispatcher(dispatch);
-        exchange.send(exchange.createMessage());
+        exchange.send(exchange.createMessage().setContent(REQUEST));
         Thread.sleep(400);
-        
-        Assert.assertNotNull(outHandler.getLastExchange());
-        Assert.assertEquals(
-                exchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN).getValue(), 
-                outHandler.getLastExchange().getContext().getProperty(Exchange.RELATES_TO, Scope.OUT).getValue());
+
+        Exchange lastExchange = outHandler.getLastExchange();
+        assertNotNull(lastExchange);
+
+//        assertEquals(REQUEST, lastExchange.getMessage().getContent());
+
+        assertEquals(
+            exchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN).getValue(), 
+            lastExchange.getContext().getProperty(Exchange.RELATES_TO, Scope.OUT).getValue()
+        );
     }
     
 }
@@ -116,7 +124,8 @@ public class ExchangeDispatcherTest {
  * Holds a reference to the most recent exchange received by the handler.
  */
 class ExchangeSink extends BaseHandler {
-   
+
+    static final String REPLY = "REPLY";
     private Exchange _lastExchange;
     private boolean _reply;
     
@@ -132,7 +141,7 @@ class ExchangeSink extends BaseHandler {
     public void handleMessage(Exchange exchange) throws HandlerException {
         _lastExchange = exchange;
         if (_reply) {
-            exchange.send(exchange.createMessage());
+            exchange.send(exchange.createMessage().setContent(REPLY));
         }
     }
     

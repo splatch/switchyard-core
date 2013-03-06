@@ -65,23 +65,25 @@ public class ExchangeImpl implements SecurityExchange {
     private ServiceReference        _consumer;
     private Service                 _provider;
     private BaseExchangeContract    _contract = new BaseExchangeContract();
-    
+
     /**
      * Create a new exchange with no endpoints initialized.  At a minimum, the 
      * input endpoint must be set before sending an exchange.
      * @param domain service domain for this exchange
      */
-    public ExchangeImpl(ServiceDomain domain) {
-        this(domain, null);        
+    public ExchangeImpl(ServiceDomain domain, Dispatcher dispatcher) {
+        this(domain, dispatcher, null);
     }
-    
+
     /**
      * Constructor.
      * @param domain service domain for this exchange
+     * @param dispatch exchange dispatcher
      * @param replyHandler handler for replies
      */
-    public ExchangeImpl(ServiceDomain domain, ExchangeHandler replyHandler) {
+    public ExchangeImpl(ServiceDomain domain, Dispatcher dispatch, ExchangeHandler replyHandler) {
         _domain = domain;
+        _dispatch = dispatch;
         _replyHandler = replyHandler;
         _context = new DefaultContext();
     }
@@ -162,14 +164,6 @@ public class ExchangeImpl implements SecurityExchange {
      */
     public ExchangeHandler getReplyHandler() {
         return _replyHandler;
-    }
-
-    /**
-     * Set the exchange dispatcher.
-     * @param dispatch exchange dispatcher
-     */
-    public void setOutputDispatcher(Dispatcher dispatch) {
-        _dispatch = dispatch;
     }
 
     /**

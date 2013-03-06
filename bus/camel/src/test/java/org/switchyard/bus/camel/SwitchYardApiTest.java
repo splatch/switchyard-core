@@ -18,34 +18,38 @@
  */
 package org.switchyard.bus.camel;
 
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 import org.switchyard.Exchange;
+import org.switchyard.Message;
 
 /**
- * Simple helper to enclose logic necessary to obtain SwitchYard exchange from
- * camel exchange instance.
+ * Class to test interoperability between SwitchYard and Camel exchanges.
  */
-public final class CamelHelper {
+public class SwitchYardApiTest {
 
-    private CamelHelper() { }
+    private static final String PROPERTY_VALUE = "Some dummy value";
+    private static final String PROPERTY_KEY = "some key";
+    private static final String[] LABELS = new String[] {"one", "two", "three"};
 
-    /**
-     * Lookup for SwitchYard exchange inside camel exchange.
-     * 
-     * @param exchange Camel exchange.
-     * @return Attached SwitchYard exchange.
-     */
-    public static Exchange getSwitchYardExchange(org.apache.camel.Exchange exchange) {
-        return exchange.getProperty(ExchangeDispatcher.SY_EXCHANGE, Exchange.class);
+    public Message createMessage() {
+//        return new CamelMessage();
+        return null;
     }
 
-    /**
-     * Attach SwitchYard exchange to camel exchange.
-     * 
-     * @param camelExchange Camel exchange instance.
-     * @param switchYardExchange SwitchYard exchange to attach.
-     */
-    public static void setSwitchYardExchange(org.apache.camel.Exchange camelExchange, Exchange switchYardExchange) {
-        camelExchange.setProperty(ExchangeDispatcher.SY_EXCHANGE, switchYardExchange);
+    public Exchange createExchange() {
+//        return new CamelExchange(null, null, null);
+        return null;
+    }
+
+    @Test
+    public void testProperies() {
+        
+//        Exchange exchange = createExchange();
+//        exchange.getContext().setProperty(PROPERTY_KEY, PROPERTY_VALUE).addLabels(LABELS);
+//
+//        assertEquals(PROPERTY_VALUE, exchange.getContext().getProperty(PROPERTY_KEY));
     }
 
 }

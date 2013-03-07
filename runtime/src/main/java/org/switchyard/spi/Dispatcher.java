@@ -20,7 +20,9 @@
 package org.switchyard.spi;
 
 import org.switchyard.Exchange;
+import org.switchyard.ExchangeHandler;
 import org.switchyard.ServiceReference;
+import org.switchyard.metadata.ServiceOperation;
 
 /**
  * Dispatches messages to a given service.
@@ -32,11 +34,14 @@ public interface Dispatcher {
      * @return service reference
      */
     ServiceReference getServiceReference();
-    
+
     /**
-     * Dispatch an exchange.
-     * @param exchange exchange
+     * Creates exchange which is ment to deliver to given operation.
+     * 
+     * @param operation Operation to call.
+     * @param handler Handler to handle reply from operation (if any returned). May be null.
+     * @return Exchange used to send messages.
      */
-    void dispatch(Exchange exchange);
-    
+    Exchange createExchange(ServiceOperation operation, ExchangeHandler handler);
+
 }

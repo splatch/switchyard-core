@@ -24,9 +24,9 @@ package org.switchyard.bus.camel;
 
 import org.apache.camel.ProducerTemplate;
 import org.switchyard.Exchange;
-import org.switchyard.ExchangePhase;
+import org.switchyard.ExchangeHandler;
 import org.switchyard.ServiceReference;
-import org.switchyard.bus.camel.processors.DispatcherProcessor;
+import org.switchyard.metadata.ServiceOperation;
 import org.switchyard.spi.Dispatcher;
 
 /**
@@ -59,9 +59,15 @@ public class ExchangeDispatcher implements Dispatcher {
     }
 
     @Override
-    public void dispatch(final Exchange exchange) {
-        if (exchange.getPhase().equals(ExchangePhase.IN)) {
-            _producer.send("direct:" + exchange.getConsumer().getName(), new DispatcherProcessor(exchange));
-        }
+    public Exchange createExchange(ServiceOperation operation, ExchangeHandler replyHandler) {
+        return new CamelExchange(_reference, operation, replyHandler);
     }
+
+//    @Override
+//    public void dispatch(final Exchange exchange) {
+//        if (exchange.getPhase().equals(ExchangePhase.IN)) {
+//            _producer.send("direct:" + exchange.getConsumer().getName(), new DispatcherProcessor(exchange));
+//        }
+//    }
+
 }

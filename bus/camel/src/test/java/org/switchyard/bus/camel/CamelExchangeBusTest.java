@@ -219,7 +219,6 @@ public class CamelExchangeBusTest {
                 };
             }
         });
-
         ServiceReference ref = registerInOutService("inOut", new RuntimeErrorInHandler());
         Exchange exchange = sendMessage(ref, TEST_CONTENT);
 

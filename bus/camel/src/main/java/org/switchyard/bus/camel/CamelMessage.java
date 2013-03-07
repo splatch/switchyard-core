@@ -7,15 +7,21 @@ import java.util.Map.Entry;
 import javax.activation.DataHandler;
 import javax.activation.DataSource;
 
-import org.apache.camel.impl.DefaultMessage;
+import org.apache.camel.Exchange;
 import org.switchyard.Message;
 
 public class CamelMessage implements Message {
 
-    private org.apache.camel.Message _message;
+    private final org.apache.camel.Message _message;
+    private final Exchange _exchange;
 
-    public CamelMessage() {
-        _message = new DefaultMessage();
+    public CamelMessage(Exchange exchange) {
+        this(exchange, exchange.getIn());
+    }
+
+    public CamelMessage(Exchange exchange, org.apache.camel.Message message) {
+        _exchange = exchange;
+        _message = message;
     }
 
     @Override

@@ -65,7 +65,7 @@ public class ExchangeImpl implements SecurityExchange {
     private ServiceReference        _consumer;
     private Service                 _provider;
     private BaseExchangeContract    _contract = new BaseExchangeContract();
-    
+
     /**
      * Create a new exchange with no endpoints initialized.  At a minimum, the 
      * input endpoint must be set before sending an exchange.

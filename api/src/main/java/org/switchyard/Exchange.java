@@ -145,4 +145,6 @@ public interface Exchange {
      */
     ExchangePhase getPhase();
 
+    ExchangeHandler getReplyHandler();
+
 }

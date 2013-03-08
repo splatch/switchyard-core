@@ -13,14 +13,12 @@ import org.switchyard.Message;
 public class CamelMessage implements Message {
 
     private final org.apache.camel.Message _message;
-    private final Exchange _exchange;
 
     public CamelMessage(Exchange exchange) {
-        this(exchange, exchange.getIn());
+        this(exchange.getIn());
     }
 
-    public CamelMessage(Exchange exchange, org.apache.camel.Message message) {
-        _exchange = exchange;
+    public CamelMessage(org.apache.camel.Message message) {
         _message = message;
     }
 
@@ -68,6 +66,10 @@ public class CamelMessage implements Message {
             attachements.put(attachement.getKey(), attachement.getValue().getDataSource());
         }
         return attachements;
+    }
+
+    public org.apache.camel.Message getMessage() {
+        return _message;
     }
 
 }

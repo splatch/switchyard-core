@@ -43,12 +43,12 @@ public class CamelContext implements Context {
 
     @Override
     public CamelProperty getProperty(String name, Scope scope) {
-        return property(name, scope);
+        return property(name, scope, false);
     }
 
     @Override
     public Object getPropertyValue(String name) {
-        return property(name, Scope.EXCHANGE).getValue();
+        return property(name, Scope.EXCHANGE, true).getValue();
     }
 
     @Override
@@ -82,12 +82,12 @@ public class CamelContext implements Context {
 
     @Override
     public Property setProperty(String name, Object val) {
-        return getProperty(name).setValue(val);
+        return property(name, Scope.EXCHANGE, true).setValue(val);
     }
 
     @Override
     public Property setProperty(String name, Object val, Scope scope) {
-        return getProperty(name, scope).setValue(val);
+        return property(name, scope, true).setValue(val);
     }
 
     @Override
@@ -98,12 +98,14 @@ public class CamelContext implements Context {
         return this;
     }
 
-    private CamelProperty property(String name, Scope scope) {
+    private CamelProperty property(String name, Scope scope, boolean lazy) {
+        CamelProperty property = null;
         switch (scope) {
-        case IN: return new InMessageProperty(_exchange, name);
-        case OUT: return new OutMessageProperty(_exchange, name);
-        default: return new ExchangeProperty(_exchange, name);
+        case IN: property = new InMessageProperty(_exchange, name);
+        case OUT: property = new OutMessageProperty(_exchange, name);
+        default: property = new ExchangeProperty(_exchange, name);
         }
+        return property.exists() || lazy ? property : null;
     }
 
 
@@ -112,15 +114,15 @@ public class CamelContext implements Context {
         switch (scope) {
         case EXCHANGE:
             for (String name : _exchange.getProperties().keySet()) {
-                properties.add(property(name, scope));
+                properties.add(property(name, scope, true));
             }
         case IN:
             for (String name : _exchange.getIn().getHeaders().keySet()) {
-                properties.add(property(name, scope));
+                properties.add(property(name, scope, true));
             }
         case OUT:
             for (String name : _exchange.getIn().getHeaders().keySet()) {
-                properties.add(property(name, scope));
+                properties.add(property(name, scope, true));
             }
         }
         return properties;

@@ -56,8 +56,7 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
     private static final Predicate IN_OUT_CHECK = new Predicate() {
         @Override
         public boolean matches(Exchange exchange) {
-            org.switchyard.Exchange syEx = CamelHelper.getSwitchYardExchange(exchange);
-            ServiceOperation operation = syEx.getContract().getConsumerOperation();
+            ServiceOperation operation = new CamelExchange(exchange).getContract().getConsumerOperation();
             return operation.getExchangePattern() == ExchangePattern.IN_OUT;
         }
 

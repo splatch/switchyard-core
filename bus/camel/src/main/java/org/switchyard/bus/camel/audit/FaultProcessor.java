@@ -33,7 +33,7 @@ import org.apache.camel.util.ExchangeHelper;
 import org.apache.log4j.Logger;
 import org.switchyard.ExchangeState;
 import org.switchyard.HandlerException;
-import org.switchyard.bus.camel.CamelHelper;
+import org.switchyard.bus.camel.CamelExchange;
 import org.switchyard.bus.camel.ErrorListener;
 
 /**
@@ -61,9 +61,8 @@ public class FaultProcessor extends DelegateAsyncProcessor {
             @Override
             public void done(boolean doneSync) {
                 if (doneSync) { // verify exchange only if processing is done
-                    org.switchyard.Exchange exc = CamelHelper.getSwitchYardExchange(exchange);
                     if (exchange.getException() != null) {
-                        handle(exchange.getException(), exchange, exc);
+                        handle(exchange.getException(), exchange, new CamelExchange(exchange));
                     }
                 }
                 callback.done(doneSync);

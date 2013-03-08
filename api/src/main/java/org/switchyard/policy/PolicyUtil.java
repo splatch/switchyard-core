@@ -34,9 +34,9 @@ import org.switchyard.Property;
  */
 public final class PolicyUtil {
 
-    private static String PROVIDED_PROPERTY = "org.switchyard.policy.provided";
-    private static String REQUIRED_PROPERTY = "org.switchyard.policy.required";
-    
+    public static String PROVIDED_PROPERTY = "org.switchyard.policy.provided";
+    public static String REQUIRED_PROPERTY = "org.switchyard.policy.required";
+
     private PolicyUtil() {
         
     }

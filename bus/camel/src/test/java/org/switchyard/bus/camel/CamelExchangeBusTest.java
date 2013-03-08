@@ -42,7 +42,6 @@ import org.switchyard.Exchange;
 import org.switchyard.ExchangeHandler;
 import org.switchyard.ExchangeState;
 import org.switchyard.HandlerException;
-import org.switchyard.Message;
 import org.switchyard.MockDomain;
 import org.switchyard.MockHandler;
 import org.switchyard.ServiceReference;
@@ -99,17 +98,6 @@ public class CamelExchangeBusTest {
         Dispatcher dispatch = _provider.createDispatcher(ref);
 
         assertEquals(dispatch, _provider.getDispatcher(ref));
-    }
-
-    @Test
-    public void testExchange() {
-        ServiceReference ref = new ServiceReferenceImpl(
-            new QName("testGetDispatcher"), new InOnlyService(), null);
-
-        Exchange camelExchange = ref.createExchange();
-        assertTrue("Expected camel exchange implementation", camelExchange instanceof CamelExchange);
-        Message message = camelExchange.createMessage();
-        assertTrue("Expected custom message implementation", message instanceof CamelMessage);
     }
 
     /**

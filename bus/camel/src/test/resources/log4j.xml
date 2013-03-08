@@ -27,6 +27,9 @@
         </layout>
     </appender>
 
+    <logger name="org.switchyard.bus.camel">
+        <level value="DEBUG"/>
+    </logger>
     <logger name="org.jboss.weld.Bootstrap">
         <level value="ERROR"/>
     </logger>

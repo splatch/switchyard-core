@@ -53,7 +53,11 @@ class MessageProperty extends CamelProperty {
     @Override
     public void remove() {
         _message.removeHeader(getName());
-//        _message.getHeader(LABELS, Map.class).remove(getName());
+    }
+
+    @Override
+    public boolean exists() {
+        return _message.getHeaders().containsKey(getName());
     }
 
     @Override

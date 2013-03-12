@@ -19,10 +19,9 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
-
 package org.switchyard.bus.camel;
+
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -216,8 +215,8 @@ public class CamelExchangeBusTest {
 
     protected static void assertNoCause(String message, Exchange exchange) {
         assertEquals(ExchangeState.FAULT, exchange.getState());
-        HandlerException exception = exchange.getMessage().getContent(HandlerException.class);
-        assertFalse(exception.isWrapper());
+        Exception exception = exchange.getMessage().getContent(Exception.class);
+        assertNotNull("Exception should not be null", exception);
         assertNull("Cause should be null", exception.getCause());
         assertEquals(message, exception.getMessage());
     }

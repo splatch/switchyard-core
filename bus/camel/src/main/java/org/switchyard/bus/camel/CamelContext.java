@@ -101,13 +101,12 @@ public class CamelContext implements Context {
     private CamelProperty property(String name, Scope scope, boolean lazy) {
         CamelProperty property = null;
         switch (scope) {
-        case IN: property = new InMessageProperty(_exchange, name);
-        case OUT: property = new OutMessageProperty(_exchange, name);
+        case IN: property = new InMessageProperty(_exchange, name); break;
+        case OUT: property = new OutMessageProperty(_exchange, name); break;
         default: property = new ExchangeProperty(_exchange, name);
         }
         return property.exists() || lazy ? property : null;
     }
-
 
     private Set<Property> properties(Scope scope) {
         Set<Property> properties = new HashSet<Property>();
@@ -121,8 +120,10 @@ public class CamelContext implements Context {
                 properties.add(property(name, scope, true));
             }
         case OUT:
-            for (String name : _exchange.getIn().getHeaders().keySet()) {
-                properties.add(property(name, scope, true));
+            if (_exchange.hasOut()) {
+                for (String name : _exchange.getOut().getHeaders().keySet()) {
+                    properties.add(property(name, scope, true));
+                }
             }
         }
         return properties;

@@ -103,7 +103,7 @@ public class LocalExchangeBus implements ExchangeBus {
         requestChain.addFirst("domain-handlers", userHandlers);
         replyChain.addFirst("domain-handlers", userHandlers);
         
-        Dispatcher dispatcher = new LocalDispatcher(reference, requestChain, replyChain);
+        Dispatcher dispatcher = new LocalDispatcher(_domain, reference, requestChain, replyChain);
         _dispatchers.put(reference.getName(), dispatcher);
         
         return dispatcher;
@@ -120,12 +120,15 @@ class LocalDispatcher implements Dispatcher {
     private HandlerChain _requestChain;
     private HandlerChain _replyChain;
     private ServiceReference _reference;
+    private ServiceDomain _domain;
 
     /**
      * Constructor.
+     * @param _domain 
      * @param handlerChain handler chain
      */
-    LocalDispatcher(final ServiceReference reference, final HandlerChain requestChain, final HandlerChain replyChain) {
+    LocalDispatcher(ServiceDomain domain, final ServiceReference reference, final HandlerChain requestChain, final HandlerChain replyChain) {
+        this._domain = domain;
         _reference = reference;
         _requestChain = requestChain;
         _replyChain = replyChain;
@@ -152,6 +155,11 @@ class LocalDispatcher implements Dispatcher {
     @Override
     public ServiceReference getServiceReference() {
         return _reference;
+    }
+
+    @Override
+    public Exchange createExchange(ExchangeHandler handler) {
+        return new ExchangeImpl(_domain, this, handler);
     }
 }
 

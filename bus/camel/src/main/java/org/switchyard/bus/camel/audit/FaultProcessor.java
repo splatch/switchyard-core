@@ -31,7 +31,6 @@ import org.apache.camel.Processor;
 import org.apache.camel.processor.DelegateAsyncProcessor;
 import org.apache.camel.util.ExchangeHelper;
 import org.apache.log4j.Logger;
-import org.switchyard.ExchangeState;
 import org.switchyard.HandlerException;
 import org.switchyard.bus.camel.CamelExchange;
 import org.switchyard.bus.camel.ErrorListener;
@@ -79,7 +78,8 @@ public class FaultProcessor extends DelegateAsyncProcessor {
      * @param exchange SwitchYard exchange related to exception.
      */
     protected void handle(Throwable throwable, Exchange camel, org.switchyard.Exchange exchange) {
-        if (ExchangeState.OK == exchange.getState()) {
+        Throwable caught = camel.getProperty(Exchange.EXCEPTION_CAUGHT, Throwable.class);
+        if (caught == null || throwable.equals(caught)) {
             notifyListeners(camel.getContext(), exchange, throwable);
             Throwable content = detectHandlerException(throwable);
             exchange.sendFault(exchange.createMessage().setContent(content));

@@ -37,15 +37,9 @@ import org.switchyard.spi.Dispatcher;
  */
 public class ExchangeDispatcher implements Dispatcher {
 
-    /**
-     * Property used to store a reference to the SY exchange in a Camel exchange.
-     */
-    public static final String SY_EXCHANGE = "SwitchYardExchange";
-
     private final ModelCamelContext _context;
     private ServiceReference _reference;
     private ProducerTemplate _producer;
-
 
     /**
      * Create a new Dispatcher instance.
@@ -72,7 +66,7 @@ public class ExchangeDispatcher implements Dispatcher {
     public void dispatch(final Exchange exchange) {
         if (exchange instanceof CamelExchange) {
             if (exchange.getPhase().equals(ExchangePhase.IN)) {
-                _producer.send("direct:" + exchange.getConsumer().getName(),((CamelExchange) exchange).getExchange());
+                _producer.send("direct:" + exchange.getConsumer().getName(), ((CamelExchange) exchange).getExchange());
             }
         } else {
             throw new IllegalArgumentException("Camel Bus accepts only CamelExchanges");

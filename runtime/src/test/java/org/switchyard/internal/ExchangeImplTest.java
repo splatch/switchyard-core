@@ -43,6 +43,7 @@ import org.switchyard.metadata.InOutOperation;
 import org.switchyard.metadata.InOutService;
 import org.switchyard.metadata.java.JavaService;
 import org.switchyard.runtime.event.ExchangeCompletionEvent;
+import org.switchyard.spi.Dispatcher;
 import org.switchyard.transform.BaseTransformer;
 
 /**
@@ -51,15 +52,18 @@ import org.switchyard.transform.BaseTransformer;
 public class ExchangeImplTest {
     
     private MockDomain _domain;
-    
+	private Dispatcher _dispatch;
+
     @Before
     public void setUp() throws Exception {
         _domain = new MockDomain();
+        ServiceReference reference = _domain.createInOnlyService(new QName("foo"));
+        _dispatch = _domain.getBus().createDispatcher(reference);
     }
     
     @Test
     public void testSendFaultOnNewExchange() {
-        Exchange exchange = new ExchangeImpl(_domain);
+        Exchange exchange = new ExchangeImpl(_domain, _dispatch);
         try {
             exchange.sendFault(exchange.createMessage());
             Assert.fail("Sending a fault on a new exchange is not allowed");
@@ -70,7 +74,7 @@ public class ExchangeImplTest {
     
     @Test
     public void testPhaseIsNullOnNewExchange() {
-        Exchange exchange = new ExchangeImpl(_domain);
+        Exchange exchange = new ExchangeImpl(_domain, _dispatch);
         Assert.assertNull(exchange.getPhase());
     }
     
@@ -132,7 +136,7 @@ public class ExchangeImplTest {
 
     @Test
     public void testNullSend() {
-        Exchange exchange = new ExchangeImpl(_domain);
+        Exchange exchange = new ExchangeImpl(_domain, _dispatch);
         try {
             exchange.send(null);
             Assert.fail("Expected IllegalArgumentException.");
@@ -143,7 +147,7 @@ public class ExchangeImplTest {
 
     @Test
     public void testNullSendFault() {
-        Exchange exchange = new ExchangeImpl(_domain);
+        Exchange exchange = new ExchangeImpl(_domain, _dispatch);
         try {
             exchange.sendFault(null);
             Assert.fail("Expected IllegalArgumentException.");

@@ -32,10 +32,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.ErrorHandlerBuilder;
-import org.apache.camel.builder.LoggingErrorHandlerBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.ExpressionNode;
 import org.apache.camel.model.FilterDefinition;
@@ -45,6 +43,7 @@ import org.apache.camel.spi.InterceptStrategy;
 import org.switchyard.ExchangePattern;
 import org.switchyard.bus.camel.audit.AuditInterceptStrategy;
 import org.switchyard.bus.camel.audit.FaultInterceptStrategy;
+import org.switchyard.bus.camel.audit.StepwiseInterceptStrategy;
 import org.switchyard.exception.SwitchYardException;
 import org.switchyard.metadata.ServiceOperation;
 
@@ -90,15 +89,14 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
                 throw new SwitchYardException("Only one exception handler can be defined. Found " + handlers.keySet());
             }
         } else {
-            // set up default error handler without re-delivery
-            LoggingErrorHandlerBuilder errorHandler = loggingErrorHandler(CamelExchangeBus.class.getName());
-            errorHandler.setLevel(LoggingLevel.DEBUG);
-            definition.errorHandler(errorHandler);
+            definition.errorHandler(noErrorHandler());
         }
 
+        definition.addInterceptStrategy(new InOutInterceptStrategy());
         definition.addInterceptStrategy(new FaultInterceptStrategy());
         // add default intercept strategy using @Audit annotation
         definition.addInterceptStrategy(new AuditInterceptStrategy());
+        definition.addInterceptStrategy(new StepwiseInterceptStrategy());
 
         Map<String, InterceptStrategy> interceptStrategies = getContext().getRegistry().lookupByType(InterceptStrategy.class);
         if (interceptStrategies != null) {
@@ -118,7 +116,7 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
             .processRef(CONSUMER_CALLBACK.name());
 
         OnExceptionDefinition onException = new OnExceptionDefinition(Throwable.class);
-        onException.handled(true);
+        //onException.handled(true);
         onException.addOutput(filterDefinition);
         // register exception closure
         definition.addOutput(onException);

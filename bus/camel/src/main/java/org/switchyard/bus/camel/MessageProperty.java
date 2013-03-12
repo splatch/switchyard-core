@@ -27,54 +27,67 @@ import org.apache.camel.Message;
 import org.switchyard.Property;
 import org.switchyard.Scope;
 
-class MessageProperty extends CamelProperty {
+abstract class MessageProperty extends CamelProperty {
 
-    private final Message _message;
+    protected final Exchange _exchange;
 
-    public MessageProperty(Scope scope, Message message, String name) {
+    public MessageProperty(Scope scope, Exchange exchange, String name) {
         super(scope, name);
-        _message = message;
-        if (_message.getHeader(LABELS) == null || !(_message.getHeader(LABELS) instanceof Map)) {
-            _message.setHeader(LABELS, new HashMap<String, Set<String>>());
-        }
+        _exchange = exchange;
     }
+
+    protected abstract Message getMessage();
 
     @Override
     public Object getValue() {
-        return _message.getHeader(getName());
+        return getMessage() != null ? getMessage().getHeader(getName()) : null;
     }
 
     @Override
     public Property setValue(Object val) {
-        _message.setHeader(getName(), val);
+        if (getMessage() != null) {
+            getMessage().setHeader(getName(), val);
+        }
         return this;
     }
 
     @Override
     public void remove() {
-        _message.removeHeader(getName());
+        if (getMessage() != null) {
+            getMessage().removeHeader(getName());
+        }
     }
 
     @Override
     public boolean exists() {
-        return _message.getHeaders().containsKey(getName());
+        return getMessage() != null && getMessage().getHeaders().containsKey(getName());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     protected Map<String, Set<String>> getLabelsBag() {
-        return _message.getHeader(LABELS, Map.class);
+        return getMessage() != null ? getMessage().getHeader(LABELS, Map.class) : new HashMap<String, Set<String>>();
     }
 
     public static class InMessageProperty extends MessageProperty {
         public InMessageProperty(Exchange exchange, String name) {
-            super(Scope.IN, exchange.getIn(), name);
+            super(Scope.IN, exchange, name);
+        }
+
+        @Override
+        protected Message getMessage() {
+            return _exchange.getIn();
         }
     }
 
     public static class OutMessageProperty extends MessageProperty {
         public OutMessageProperty(Exchange exchange, String name) {
-            super(Scope.OUT, exchange.getOut(), name);
+            super(Scope.OUT, exchange, name);
+        }
+
+        @Override
+        protected Message getMessage() {
+            return _exchange.hasOut() ? _exchange.getOut() : null;
         }
     }
 

@@ -79,10 +79,15 @@ public class FaultProcessor extends DelegateAsyncProcessor {
      * @param exchange SwitchYard exchange related to exception.
      */
     protected void handle(Throwable throwable, Exchange camel, org.switchyard.Exchange exchange) {
+        // exception caught == we are in error handling route part
         Throwable caught = camel.getProperty(Exchange.EXCEPTION_CAUGHT, Throwable.class);
         if (caught == null || throwable.equals(caught)) {
             notifyListeners(camel.getContext(), exchange, throwable);
             Throwable content = detectHandlerException(throwable);
+            // TODO fix me!!!
+            throwable.printStackTrace();
+            // reset exception
+            camel.setException(null);
             exchange.sendFault(exchange.createMessage().setContent(content));
         } else {
             // exception thrown during handling FAULT state cannot be forwarded

@@ -11,7 +11,7 @@ public class StepwiseInterceptStrategy implements InterceptStrategy {
     public Processor wrapProcessorInInterceptors(CamelContext context,
         ProcessorDefinition<?> definition, Processor target,
         Processor nextTarget) throws Exception {
-        return new StepwiseProcessor(target);
+        return new StepwiseProcessor(target, definition);
     }
 
 }

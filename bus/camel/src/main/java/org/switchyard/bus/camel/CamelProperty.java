@@ -10,7 +10,7 @@ import org.switchyard.Scope;
 
 public abstract class CamelProperty implements Property {
 
-    public final static String LABELS = "org.switchyard.message.property.labels";
+    public final static String LABELS = "org.switchyardbus.camel.labels";
 
     private final Scope _scope;
     private final String _name;
@@ -22,7 +22,6 @@ public abstract class CamelProperty implements Property {
 
     public abstract void remove();
     public abstract Property setValue(Object val);
-    public abstract boolean exists();
     protected abstract Map<String, Set<String>> getLabelsBag();
 
     @Override

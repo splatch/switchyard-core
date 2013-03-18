@@ -21,6 +21,7 @@ package org.switchyard.bus.camel;
 import static org.switchyard.bus.camel.processors.Processors.ADDRESSING;
 import static org.switchyard.bus.camel.processors.Processors.CONSUMER_CALLBACK;
 import static org.switchyard.bus.camel.processors.Processors.DOMAIN_HANDLERS;
+import static org.switchyard.bus.camel.processors.Processors.ERROR_HANDLING;
 import static org.switchyard.bus.camel.processors.Processors.GENERIC_POLICY;
 import static org.switchyard.bus.camel.processors.Processors.PROVIDER_CALLBACK;
 import static org.switchyard.bus.camel.processors.Processors.SECURITY;
@@ -38,11 +39,11 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.ExpressionNode;
 import org.apache.camel.model.FilterDefinition;
 import org.apache.camel.model.OnExceptionDefinition;
+import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.spi.InterceptStrategy;
 import org.switchyard.ExchangePattern;
 import org.switchyard.bus.camel.audit.AuditInterceptStrategy;
-import org.switchyard.bus.camel.audit.FaultInterceptStrategy;
 import org.switchyard.bus.camel.audit.StepwiseInterceptStrategy;
 import org.switchyard.exception.SwitchYardException;
 import org.switchyard.metadata.ServiceOperation;
@@ -89,12 +90,12 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
                 throw new SwitchYardException("Only one exception handler can be defined. Found " + handlers.keySet());
             }
         } else {
-            definition.errorHandler(noErrorHandler());
+            definition.errorHandler(loggingErrorHandler());
         }
 
-        definition.addInterceptStrategy(new StepwiseInterceptStrategy());
-        definition.addInterceptStrategy(new FaultInterceptStrategy());
-        definition.addInterceptStrategy(new InOutInterceptStrategy());
+        //definition.addInterceptStrategy(new StepwiseInterceptStrategy());
+        //definition.addInterceptStrategy(new InOutInterceptStrategy());
+        //definition.addInterceptStrategy(new FaultInterceptStrategy());
         // add default intercept strategy using @Audit annotation
         definition.addInterceptStrategy(new AuditInterceptStrategy());
 
@@ -108,16 +109,9 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
             }
         }
 
-        final ExpressionNode filterDefinition = new FilterDefinition(IN_OUT_CHECK)
-            .processRef(DOMAIN_HANDLERS.name())
-            .processRef(VALIDATION.name())
-            .processRef(TRANSFORMATION.name())
-            .processRef(VALIDATION.name())
-            .processRef(CONSUMER_CALLBACK.name());
-
         OnExceptionDefinition onException = new OnExceptionDefinition(Throwable.class);
-        //onException.handled(true);
-        onException.addOutput(filterDefinition);
+        onException.processRef(ERROR_HANDLING.name());
+        onException.addOutput(createFilterDefinition());
         // register exception closure
         definition.addOutput(onException);
 
@@ -132,7 +126,16 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
             .processRef(VALIDATION.name())
             .processRef(PROVIDER_CALLBACK.name())
             .processRef(TRANSACTION_HANDLER.name())
-            .addOutput(filterDefinition);
+            .addOutput(createFilterDefinition());
+    }
+
+    private ExpressionNode createFilterDefinition() {
+        return new FilterDefinition(IN_OUT_CHECK)
+            .processRef(DOMAIN_HANDLERS.name())
+            .processRef(VALIDATION.name())
+            .processRef(TRANSFORMATION.name())
+            .processRef(VALIDATION.name())
+            .processRef(CONSUMER_CALLBACK.name());
     }
 
 }

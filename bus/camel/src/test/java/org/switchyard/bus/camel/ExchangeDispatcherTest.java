@@ -34,6 +34,7 @@ import org.switchyard.BaseHandler;
 import org.switchyard.Exchange;
 import org.switchyard.HandlerException;
 import org.switchyard.MockDomain;
+import org.switchyard.Property;
 import org.switchyard.Scope;
 import org.switchyard.Service;
 import org.switchyard.ServiceDomain;
@@ -112,10 +113,11 @@ public class ExchangeDispatcherTest {
 
 //        assertEquals(REQUEST, lastExchange.getMessage().getContent());
 
-        assertEquals(
-            exchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN).getValue(), 
-            lastExchange.getContext().getProperty(Exchange.RELATES_TO, Scope.OUT).getValue()
-        );
+        Property messageId = exchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN);
+        assertNotNull("Message id must be available after sending message and receiving response", messageId);
+        Property relatesTo = lastExchange.getContext().getProperty(Exchange.RELATES_TO, Scope.OUT);
+        assertNotNull("Relates to must be specified for outgoing message", relatesTo);
+        assertEquals("Relates to property should point to in message id", messageId.getValue(), relatesTo.getValue());
     }
     
 }

@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Message;
+import org.switchyard.ExchangePhase;
 import org.switchyard.Property;
 import org.switchyard.Scope;
 
@@ -34,39 +34,33 @@ abstract class MessageProperty extends CamelProperty {
     public MessageProperty(Scope scope, Exchange exchange, String name) {
         super(scope, name);
         _exchange = exchange;
+        if (!getHeaders().containsKey(LABELS) || getHeaders().get(LABELS) == null) {
+            getHeaders().put(LABELS, new HashMap<String, Set<String>>());
+        }
     }
 
-    protected abstract Message getMessage();
+    public abstract Map<String, Object> getHeaders();
 
     @Override
     public Object getValue() {
-        return getMessage() != null ? getMessage().getHeader(getName()) : null;
+        return getHeaders().get(getName());
     }
 
     @Override
     public Property setValue(Object val) {
-        if (getMessage() != null) {
-            getMessage().setHeader(getName(), val);
-        }
+        getHeaders().put(getName(), val);
         return this;
     }
 
     @Override
     public void remove() {
-        if (getMessage() != null) {
-            getMessage().removeHeader(getName());
-        }
-    }
-
-    @Override
-    public boolean exists() {
-        return getMessage() != null && getMessage().getHeaders().containsKey(getName());
+        getHeaders().remove(getName());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     protected Map<String, Set<String>> getLabelsBag() {
-        return getMessage() != null ? getMessage().getHeader(LABELS, Map.class) : new HashMap<String, Set<String>>();
+        return (Map<String, Set<String>>) getHeaders().get(LABELS);
     }
 
     public static class InMessageProperty extends MessageProperty {
@@ -75,8 +69,8 @@ abstract class MessageProperty extends CamelProperty {
         }
 
         @Override
-        protected Message getMessage() {
-            return _exchange.getProperty(CamelExchange.MSG) != null ? _exchange.getProperty(CamelExchange.MSG, Message.class) : _exchange.getIn();
+        public Map<String, Object> getHeaders() {
+            return CamelExchange.getInHeaders(_exchange);
         }
     }
 
@@ -86,8 +80,8 @@ abstract class MessageProperty extends CamelProperty {
         }
 
         @Override
-        protected Message getMessage() {
-            return _exchange.hasOut() ? _exchange.getOut() : null;
+        public Map<String, Object> getHeaders() {
+            return CamelExchange.getOutHeaders(_exchange);
         }
     }
 

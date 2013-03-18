@@ -4,17 +4,18 @@ import java.util.Map;
 
 import javax.xml.namespace.QName;
 
-import org.apache.camel.impl.DefaultMessage;
+import org.apache.camel.util.CaseInsensitiveMap;
 import org.switchyard.Context;
 import org.switchyard.Exchange;
 import org.switchyard.ExchangeHandler;
 import org.switchyard.ExchangePhase;
 import org.switchyard.ExchangeState;
-import org.switchyard.Labels;
 import org.switchyard.Message;
+import org.switchyard.Property;
 import org.switchyard.Scope;
 import org.switchyard.Service;
 import org.switchyard.ServiceReference;
+import org.switchyard.label.BehaviorLabel;
 import org.switchyard.metadata.BaseExchangeContract;
 import org.switchyard.metadata.ServiceOperation;
 import org.switchyard.security.SecurityContext;
@@ -22,13 +23,13 @@ import org.switchyard.security.SecurityExchange;
 
 public class CamelExchange implements SecurityExchange {
 
-    private static final String DISPATCHER = "org.switchyard.bus.camel.exchangeDispatcher";
-    private static final String CONSUMER = "org.switchyard.bus.camel.consumer";
-    private static final String PROVIDER = "org.switchyard.bus.camel.provider";
-    private static final String CONTRACT = "org.switchyard.bus.camel.contract";
-    private static final String REPLY_HANDLER = "replyHandler";
-    public static final String PHASE = "phase";
-    public static final String MSG = "message";
+    private static final String DISPATCHER    = "org.switchyard.bus.camel.dispatcher";
+    private static final String CONSUMER      = "org.switchyard.bus.camel.consumer";
+    private static final String PROVIDER      = "org.switchyard.bus.camel.provider";
+    private static final String CONTRACT      = "org.switchyard.bus.camel.contract";
+    private static final String REPLY_HANDLER = "org.switchyard.bus.camel.replyHandler";
+    private static final String PHASE         = "org.switchyard.bus.camel.phase";
+    private static final String IN_HEADERS    = "org.switchyard.bus.camel.headers.in";
 
     private SecurityContext _securityContext = new SecurityContext();
     private org.apache.camel.Exchange _exchange;
@@ -93,7 +94,7 @@ public class CamelExchange implements SecurityExchange {
 
     @Override
     public Message createMessage() {
-        return new CamelMessage(new DefaultMessage());
+        return new CamelMessage(new SwitchYardMessage());
     }
 
     @Override
@@ -101,16 +102,32 @@ public class CamelExchange implements SecurityExchange {
         org.apache.camel.Message camelMsg = extract(message);
 
         if (getPhase() == null) {
-            _exchange.setIn(camelMsg);
+            // specify active phase to IN
             _exchange.setProperty(PHASE, ExchangePhase.IN);
+
+            // here is more tricky part, as we will lose our IN message with all previous headers
+            // we need keep these headers somewhere - in this case in exchange property
+           _exchange.setProperty(IN_HEADERS, _exchange.getIn().getHeaders());
+
+           // as there is no phase for exchange we receive first "send" call
+            // specify message for exchange to obtain message id
+            _exchange.setIn(camelMsg);
             getContext().setProperty(Exchange.MESSAGE_ID, camelMsg.getMessageId(), Scope.IN);
         } else {
-            _exchange.setOut(camelMsg);
-            getContext().setProperty(Exchange.RELATES_TO, _exchange.getIn().getMessageId(), Scope.OUT);
+            // store message
+            _exchange.setIn(camelMsg);
+            // first of all activate OUT phase
+            _exchange.setProperty(PHASE, ExchangePhase.OUT);
+            // let obtain message id for IN message
+            Property property = getContext().getProperty(MESSAGE_ID, Scope.IN);
+            // and link outgoing message with message which is lost
+            getContext().setProperty(Exchange.RELATES_TO, property.getValue(), Scope.OUT);
+            // finally specify message for camel exchange
+            // it doesn't meter if it's IN or OUT as camel move OUT to IN during walking
+            // trough next processors - if we have no OUT message Camel will assume that
+            // current IN is OUT for exchange
             getContext().setProperty(Exchange.MESSAGE_ID, camelMsg.getMessageId(), Scope.OUT);
 
-            _exchange.setProperty(PHASE, ExchangePhase.OUT);
-            _exchange.setProperty(MSG, _exchange.getIn()); // keep message
         }
 
         initInContentType();
@@ -126,8 +143,8 @@ public class CamelExchange implements SecurityExchange {
 
     @Override
     public void sendFault(Message message) {
-        _exchange.setIn(extract(message));
-        _exchange.getIn().setFault(true);
+        _exchange.setOut(extract(message));
+        //_exchange.getOut().setFault(true);
         _exchange.setProperty(PHASE, ExchangePhase.OUT);
         sendInternal();
     }
@@ -136,7 +153,8 @@ public class CamelExchange implements SecurityExchange {
         QName exchangeInputType = getContract().getConsumerOperation().getInputType();
 
         if (exchangeInputType != null) {
-            getContext().setProperty(Exchange.CONTENT_TYPE, exchangeInputType, Scope.IN).addLabels(Labels.TRANSIENT);
+            getContext().setProperty(Exchange.CONTENT_TYPE, exchangeInputType, Scope.IN)
+                .addLabels(BehaviorLabel.TRANSIENT.label());
         }
     }
 
@@ -146,12 +164,12 @@ public class CamelExchange implements SecurityExchange {
 
     @Override
     public ExchangeState getState() {
-        return _exchange.isFailed() ? ExchangeState.FAULT : ExchangeState.OK;
+        return _exchange.getProperty(org.apache.camel.Exchange.EXCEPTION_CAUGHT) != null ? ExchangeState.FAULT : ExchangeState.OK;
     }
 
     @Override
     public ExchangePhase getPhase() {
-        return _exchange.isFailed() ? ExchangePhase.OUT : _exchange.getProperty(PHASE, ExchangePhase.class);
+        return _exchange.getProperty(PHASE, ExchangePhase.class);
     }
 
     @Override
@@ -166,6 +184,26 @@ public class CamelExchange implements SecurityExchange {
     @Override
     public ExchangeHandler getReplyHandler() {
         return _exchange.getProperty(REPLY_HANDLER, ExchangeHandler.class);
+    }
+
+    public static ExchangePhase getPhase(org.apache.camel.Exchange exchange) {
+        return exchange.getProperty(PHASE, ExchangePhase.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Map<String, Object> getInHeaders(org.apache.camel.Exchange exchange) {
+        return exchange.getProperty(IN_HEADERS, new CaseInsensitiveMap(), Map.class);
+    }
+
+    public static void setInHeaders(org.apache.camel.Exchange exchange, Map<String, Object> headers) {
+        exchange.setProperty(IN_HEADERS, headers);
+    }
+
+    public static Map<String, Object> getOutHeaders(org.apache.camel.Exchange exchange) {
+        if (ExchangePhase.OUT == CamelExchange.getPhase(exchange)) {
+            return exchange.getIn().getHeaders();
+        }
+        throw new IllegalStateException("Out properties are not available during IN phase");
     }
 
 }

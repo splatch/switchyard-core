@@ -43,12 +43,13 @@ public class CamelContext implements Context {
 
     @Override
     public CamelProperty getProperty(String name, Scope scope) {
-        return property(name, scope, false);
+        return property(name, scope);
     }
 
     @Override
     public Object getPropertyValue(String name) {
-        return property(name, Scope.EXCHANGE, true).getValue();
+        CamelProperty property = property(name, Scope.EXCHANGE);
+        return property == null ? null : property.getValue();
     }
 
     @Override
@@ -63,7 +64,7 @@ public class CamelContext implements Context {
 
     @Override
     public void removeProperty(Property property) {
-        getProperty(property.getName(), property.getScope()).remove();
+        ((CamelProperty) property).remove();
     }
 
     @Override
@@ -82,7 +83,7 @@ public class CamelContext implements Context {
 
     @Override
     public Property setProperty(String name, Object val) {
-        return property(name, Scope.EXCHANGE, true).setValue(val);
+        return setProperty(name, val, Scope.EXCHANGE);
     }
 
     @Override
@@ -98,14 +99,27 @@ public class CamelContext implements Context {
         return this;
     }
 
-    private CamelProperty property(String name, Scope scope, boolean lazy) {
-        CamelProperty property = null;
-        switch (scope) {
-        case IN: property = new InMessageProperty(_exchange, name); break;
-        case OUT: property = new OutMessageProperty(_exchange, name); break;
-        default: property = new ExchangeProperty(_exchange, name);
+    private CamelProperty property(String name, Scope scope) {
+        return property(name, scope, false);
+    }
+
+    private CamelProperty property(String name, Scope scope, boolean create) {
+        if (name.startsWith("org.switchyard.bus.camel")) {
+            return null;
         }
-        return property.exists() || lazy ? property : null;
+        switch (scope) {
+        case IN: 
+            if (CamelExchange.getInHeaders(_exchange).containsKey(name) || create) {
+                return new InMessageProperty(_exchange, name);
+            }
+            return null;
+        case OUT: 
+            if (CamelExchange.getOutHeaders(_exchange).containsKey(name) || create) {
+                return new OutMessageProperty(_exchange, name);
+            }
+            return null;
+        }
+        return _exchange.getProperties().containsKey(name) || create ? new ExchangeProperty(_exchange, name) : null;
     }
 
     private Set<Property> properties(Scope scope) {
@@ -113,16 +127,25 @@ public class CamelContext implements Context {
         switch (scope) {
         case EXCHANGE:
             for (String name : _exchange.getProperties().keySet()) {
-                properties.add(property(name, scope, true));
+                CamelProperty property = property(name, scope);
+                if (property != null) {
+                    properties.add(property);
+                }
             }
         case IN:
-            for (String name : _exchange.getIn().getHeaders().keySet()) {
-                properties.add(property(name, scope, true));
+            for (String name : CamelExchange.getInHeaders(_exchange).keySet()) {
+                CamelProperty property = property(name, scope);
+                if (property != null) {
+                    properties.add(property);
+                }
             }
         case OUT:
             if (_exchange.hasOut()) {
-                for (String name : _exchange.getOut().getHeaders().keySet()) {
-                    properties.add(property(name, scope, true));
+                for (String name : CamelExchange.getOutHeaders(_exchange).keySet()) {
+                    CamelProperty property = property(name, scope);
+                    if (property != null) {
+                        properties.add(property);
+                    }
                 }
             }
         }
@@ -131,7 +154,7 @@ public class CamelContext implements Context {
 
     @Override
     public Context copy() {
-        return null;
+        return new CamelContext(_exchange.copy());
     }
 
     @Override

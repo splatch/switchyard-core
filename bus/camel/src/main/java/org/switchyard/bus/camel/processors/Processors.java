@@ -118,7 +118,18 @@ public enum Processors {
         public Processor create(ServiceDomain domain) {
             return new ConsumerCallbackProcessor();
         }
-    };
+    },
+    /**
+     * Special case processor called as first in part of route responsible
+     * for exception handling.
+     */
+    ERROR_HANDLING {
+        @Override
+        public Processor create(ServiceDomain domain) {
+            return new ErrorHandlingProcessor();
+        }
+    }
+    ;
 
     /**
      * Creates new processor for given Service Domain.

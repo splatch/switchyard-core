@@ -55,11 +55,6 @@ class ExchangeProperty extends CamelProperty {
     }
 
     @Override
-    public boolean exists() {
-        return _exchange.getProperties().containsKey(getName());
-    }
-
-    @Override
     @SuppressWarnings("unchecked")
     protected Map<String, Set<String>> getLabelsBag() {
         return _exchange.getProperty(LABELS, Map.class);

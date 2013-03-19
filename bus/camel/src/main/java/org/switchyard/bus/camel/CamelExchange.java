@@ -94,7 +94,7 @@ public class CamelExchange implements SecurityExchange {
 
     @Override
     public Message createMessage() {
-        return new CamelMessage(new SwitchYardMessage());
+        return new CamelMessage(new SwitchYardMessage(_exchange));
     }
 
     @Override

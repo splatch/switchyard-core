@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.camel.Exchange;
-import org.switchyard.ExchangePhase;
 import org.switchyard.Property;
 import org.switchyard.Scope;
 

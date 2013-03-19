@@ -10,7 +10,7 @@ import org.switchyard.Scope;
 
 public abstract class CamelProperty implements Property {
 
-    public final static String LABELS = "org.switchyardbus.camel.labels";
+    public final static String LABELS = "org.switchyard.bus.camel.labels";
 
     private final Scope _scope;
     private final String _name;

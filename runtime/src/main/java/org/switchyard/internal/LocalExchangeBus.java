@@ -26,6 +26,7 @@ import javax.xml.namespace.QName;
 import org.switchyard.BaseHandler;
 import org.switchyard.Exchange;
 import org.switchyard.ExchangeHandler;
+import org.switchyard.ExchangePattern;
 import org.switchyard.HandlerChain;
 import org.switchyard.HandlerException;
 import org.switchyard.ServiceDomain;
@@ -158,8 +159,9 @@ class LocalDispatcher implements Dispatcher {
     }
 
     @Override
-    public Exchange createExchange(ExchangeHandler handler) {
-        return new ExchangeImpl(_domain, this, handler);
+    public Exchange createExchange(ExchangeHandler handler, ExchangePattern pattern) {
+        ExchangeImpl exchangeImpl = new ExchangeImpl(_domain, this, handler);
+        return exchangeImpl;
     }
 }
 

@@ -21,6 +21,7 @@ public abstract class CamelProperty implements Property {
     }
 
     public abstract void remove();
+    public abstract boolean exists();
     public abstract Property setValue(Object val);
     protected abstract Map<String, Set<String>> getLabelsBag();
 

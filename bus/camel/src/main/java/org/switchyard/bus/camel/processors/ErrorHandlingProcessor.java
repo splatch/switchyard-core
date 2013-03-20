@@ -11,6 +11,7 @@ public class ErrorHandlingProcessor implements Processor {
     public void process(Exchange exchange) throws Exception {
         CamelExchange ex = new CamelExchange(exchange);
         Throwable content = detectHandlerException(exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class));
+        content.printStackTrace();
         ex.sendFault(ex.createMessage().setContent(content));
     }
 

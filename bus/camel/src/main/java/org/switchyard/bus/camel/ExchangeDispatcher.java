@@ -27,6 +27,7 @@ import org.apache.camel.impl.DefaultExchange;
 import org.apache.camel.model.ModelCamelContext;
 import org.switchyard.Exchange;
 import org.switchyard.ExchangeHandler;
+import org.switchyard.ExchangePattern;
 import org.switchyard.ExchangePhase;
 import org.switchyard.ServiceReference;
 import org.switchyard.spi.Dispatcher;
@@ -58,8 +59,12 @@ public class ExchangeDispatcher implements Dispatcher {
     }
 
     @Override
-    public Exchange createExchange(ExchangeHandler replyHandler) {
-        return new CamelExchange(this, new DefaultExchange(_context), replyHandler);
+    public Exchange createExchange(ExchangeHandler replyHandler, ExchangePattern pattern) {
+        return new CamelExchange(this, new DefaultExchange(_context, translate(pattern)), replyHandler);
+    }
+
+    private org.apache.camel.ExchangePattern translate(ExchangePattern pattern) {
+        return ExchangePattern.IN_OUT == pattern ? org.apache.camel.ExchangePattern.InOut : org.apache.camel.ExchangePattern.InOnly;
     }
 
     @Override

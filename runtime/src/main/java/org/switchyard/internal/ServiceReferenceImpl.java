@@ -139,7 +139,7 @@ public class ServiceReferenceImpl implements ServiceReference {
             }
         }
 
-        Exchange ex = _dispatcher.createExchange(handler);
+        Exchange ex = _dispatcher.createExchange(handler, op.getExchangePattern());
         ex.consumer(this, op);
 
         for (Policy policy : _requires) {

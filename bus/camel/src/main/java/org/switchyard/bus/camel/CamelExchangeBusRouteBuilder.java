@@ -39,7 +39,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.ExpressionNode;
 import org.apache.camel.model.FilterDefinition;
 import org.apache.camel.model.OnExceptionDefinition;
-import org.apache.camel.model.ProcessorDefinition;
 import org.apache.camel.model.RouteDefinition;
 import org.apache.camel.spi.InterceptStrategy;
 import org.switchyard.ExchangePattern;
@@ -93,10 +92,11 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
             definition.errorHandler(loggingErrorHandler());
         }
 
-        //definition.addInterceptStrategy(new StepwiseInterceptStrategy());
+        definition.addInterceptStrategy(new StepwiseInterceptStrategy());
         //definition.addInterceptStrategy(new InOutInterceptStrategy());
         //definition.addInterceptStrategy(new FaultInterceptStrategy());
         // add default intercept strategy using @Audit annotation
+        //definition.addInterceptStrategy(new ProviderInInterceptStrategy());
         definition.addInterceptStrategy(new AuditInterceptStrategy());
 
         Map<String, InterceptStrategy> interceptStrategies = getContext().getRegistry().lookupByType(InterceptStrategy.class);

@@ -71,7 +71,7 @@ public class MessageTrace implements ExchangeHandler {
             summary.append(indent(1) + p.getName() + " : " + p.getValue());
         }
         summary.append(indent(0) + "Message Context -> ");
-        for (Property p : ctx.getProperties(Scope.valueOf(exchange.getPhase().toString()))) {
+        for (Property p : ctx.getProperties(Scope.activeScope(exchange))) {
             summary.append(indent(1) + p.getName() + " : " + p.getValue());
         }
         

@@ -1,7 +1,5 @@
 package org.switchyard.bus.camel;
 
-import java.util.Map;
-
 import javax.xml.namespace.QName;
 
 import org.apache.camel.CamelContext;
@@ -9,7 +7,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.impl.DefaultMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.switchyard.ExchangePhase;
 import org.switchyard.common.camel.SwitchYardCamelContext;
 import org.switchyard.exception.SwitchYardException;
 import org.switchyard.metadata.java.JavaService;
@@ -22,17 +19,6 @@ public class SwitchYardMessage extends DefaultMessage {
 
     public SwitchYardMessage(Exchange exchange) {
         setExchange(exchange);
-    }
-
-    @Override
-    public void setHeaders(Map<String, Object> headers) {
-        super.setHeaders(headers);
-
-        if (getExchange() != null) {
-            if (ExchangePhase.IN == CamelExchange.getPhase(getExchange())) {
-                CamelExchange.setInHeaders(getExchange(), getHeaders());
-            }
-        }
     }
 
     @Override

@@ -107,45 +107,45 @@ public class CamelContext implements Context {
         if (name.startsWith("org.switchyard.bus.camel")) {
             return null;
         }
+        CamelProperty property;
         switch (scope) {
         case IN: 
-            if (CamelExchange.getInHeaders(_exchange).containsKey(name) || create) {
-                return new InMessageProperty(_exchange, name);
-            }
-            return null;
+            property = new InMessageProperty(_exchange, name);
+            break;
         case OUT: 
-            if (CamelExchange.getOutHeaders(_exchange).containsKey(name) || create) {
-                return new OutMessageProperty(_exchange, name);
-            }
-            return null;
+            property = new OutMessageProperty(_exchange, name);
+            break;
+        default:
+            property = new ExchangeProperty(_exchange, name);
         }
-        return _exchange.getProperties().containsKey(name) || create ? new ExchangeProperty(_exchange, name) : null;
+
+        return property.exists() || create ? property : null;
     }
 
     private Set<Property> properties(Scope scope) {
         Set<Property> properties = new HashSet<Property>();
         switch (scope) {
-        case EXCHANGE:
-            for (String name : _exchange.getProperties().keySet()) {
-                CamelProperty property = property(name, scope);
-                if (property != null) {
-                    properties.add(property);
-                }
-            }
         case IN:
-            for (String name : CamelExchange.getInHeaders(_exchange).keySet()) {
+            for (String name : InMessageProperty.getNames(_exchange)) {
                 CamelProperty property = property(name, scope);
                 if (property != null) {
                     properties.add(property);
                 }
             }
+            break;
         case OUT:
-            if (_exchange.hasOut()) {
-                for (String name : CamelExchange.getOutHeaders(_exchange).keySet()) {
-                    CamelProperty property = property(name, scope);
-                    if (property != null) {
-                        properties.add(property);
-                    }
+            for (String name : OutMessageProperty.getNames(_exchange)) {
+                CamelProperty property = property(name, scope);
+                if (property != null) {
+                    properties.add(property);
+                }
+            }
+            break;
+        default:
+            for (String name : ExchangeProperty.getNames(_exchange)) {
+                CamelProperty property = property(name, scope);
+                if (property != null) {
+                    properties.add(property);
                 }
             }
         }

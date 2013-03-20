@@ -1,29 +1,21 @@
 package org.switchyard.bus.camel;
 
-import org.apache.camel.AsyncCallback;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
-import org.apache.camel.processor.DelegateAsyncProcessor;
+import org.apache.camel.processor.DelegateProcessor;
 
-public class InOutProcessor extends DelegateAsyncProcessor {
+public class InOutProcessor extends DelegateProcessor {
 
     public InOutProcessor(Processor target) {
         super(target);
     }
 
     @Override
-    public boolean process(final Exchange exchange, final AsyncCallback callback) {
-        return super.process(exchange, new AsyncCallback() {
-            @Override
-            public void done(boolean doneSync) {
-                if (doneSync) {
-                    if (!exchange.hasOut()) {
-                        exchange.setOut(exchange.getIn());
-                    }
-                    callback.done(doneSync);
-                }
-            }
-        });
+    public void process(final Exchange exchange) throws Exception {
+        super.processNext(exchange);
+        if (!exchange.hasOut()) {
+            exchange.setOut(exchange.getIn());
+        }
     }
 
     @Override

@@ -32,6 +32,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.switchyard.BaseHandler;
 import org.switchyard.Exchange;
+import org.switchyard.ExchangePattern;
 import org.switchyard.HandlerException;
 import org.switchyard.MockDomain;
 import org.switchyard.Property;
@@ -75,7 +76,7 @@ public class ExchangeDispatcherTest {
         ServiceReference reference = new ServiceReferenceImpl(name, new InOnlyService(), null);
         Dispatcher dispatch = _provider.createDispatcher(reference);
 
-        Exchange exchange = dispatch.createExchange(null);
+        Exchange exchange = dispatch.createExchange(null, ExchangePattern.IN_ONLY);
         exchange.consumer(reference, reference.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.provider(service, service.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.send(exchange.createMessage().setContent(REQUEST));
@@ -102,7 +103,7 @@ public class ExchangeDispatcherTest {
         ServiceReference reference = new ServiceReferenceImpl(name, new InOutService(), null);
         Dispatcher dispatch = _provider.createDispatcher(reference);
 
-        Exchange exchange = dispatch.createExchange(outHandler);
+        Exchange exchange = dispatch.createExchange(outHandler, ExchangePattern.IN_OUT);
         exchange.consumer(reference, reference.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.provider(service, service.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.send(exchange.createMessage().setContent(REQUEST));
@@ -119,7 +120,7 @@ public class ExchangeDispatcherTest {
         assertNotNull("Relates to must be specified for outgoing message", relatesTo);
         assertEquals("Relates to property should point to in message id", messageId.getValue(), relatesTo.getValue());
     }
-    
+
 }
 
 /**
@@ -143,6 +144,7 @@ class ExchangeSink extends BaseHandler {
     public void handleMessage(Exchange exchange) throws HandlerException {
         _lastExchange = exchange;
         if (_reply) {
+            exchange.getContext().setProperty(REPLY, true, Scope.OUT);
             exchange.send(exchange.createMessage().setContent(REPLY));
         }
     }

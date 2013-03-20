@@ -33,6 +33,7 @@ public class ProviderProcessor implements Processor {
     @Override
     public void process(Exchange ex) throws Exception {
         CamelExchange exchange = new CamelExchange(ex);
+        exchange.activateOut();
         exchange.getProvider().getProviderHandler().handleMessage(exchange);
     }
 

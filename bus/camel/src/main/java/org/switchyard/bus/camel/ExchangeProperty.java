@@ -33,9 +33,11 @@ class ExchangeProperty extends CamelProperty {
     public ExchangeProperty(Exchange exchange, String name) {
         super(Scope.EXCHANGE, name);
         _exchange = exchange;
-        if (_exchange.getProperty(LABELS) == null || !(_exchange.getProperty(LABELS) instanceof Map)) {
-            _exchange.getProperty(LABELS, new HashMap<String, Set<String>>());
-        }
+    }
+
+    @Override
+    public boolean exists() {
+        return _exchange.getProperties().containsKey(getName());
     }
 
     @Override
@@ -57,7 +59,14 @@ class ExchangeProperty extends CamelProperty {
     @Override
     @SuppressWarnings("unchecked")
     protected Map<String, Set<String>> getLabelsBag() {
+        if (!_exchange.getProperties().containsKey(LABELS) || _exchange.getProperty(LABELS) == null) {
+            _exchange.setProperty(LABELS, new HashMap<String, Set<String>>());
+        }
         return _exchange.getProperty(LABELS, Map.class);
+    }
+
+    public static Set<String> getNames(Exchange exchange) {
+        return exchange.getProperties().keySet();
     }
 
 }

@@ -33,30 +33,13 @@ import org.switchyard.label.BehaviorLabel;
  */
 public class MockContext implements Context {
 
-    private final Map<String,Property> _exchangeProperties = Collections.synchronizedMap(new HashMap<String,Property>());
-    private final Map<String,Property> _inProperties = Collections.synchronizedMap(new HashMap<String,Property>());
-    private final Map<String,Property> _outProperties = Collections.synchronizedMap(new HashMap<String,Property>());
+    private final Map<String,Property> _properties = Collections.synchronizedMap(new HashMap<String,Property>());
+	private Scope _scope;
 
     public MockContext() {}
-    
-    private MockContext(Map<String, Property> exchangeProps,
-            Map<String, Property> inProps,
-            Map<String, Property> outProps) {
-        _exchangeProperties.putAll(exchangeProps);
-        _inProperties.putAll(inProps);
-        _outProperties.putAll(outProps);
-    }
 
-    private Map<String,Property> getPropertiesMap(Scope scope) {
-        switch (scope) {
-            case IN:
-                return _inProperties;
-            case OUT:
-                return _outProperties;
-            case EXCHANGE:
-            default:
-                return _exchangeProperties;
-        }
+    private MockContext(Map<String, Property> properties) {
+        _properties.putAll(properties);
     }
 
     /**
@@ -64,15 +47,7 @@ public class MockContext implements Context {
      */
     @Override
     public Property getProperty(String name) {
-        return getProperty(name, Scope.EXCHANGE);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Property getProperty(String name, Scope scope) {
-        return getPropertiesMap(scope).get(name);
+        return _properties.get(name);
     }
 
     /**
@@ -89,19 +64,7 @@ public class MockContext implements Context {
      */
     @Override
     public Set<Property> getProperties() {
-        return getProperties(Scope.EXCHANGE);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<Property> getProperties(Scope scope) {
-        Set<Property> properties = new HashSet<Property>();
-        for (Property property : getPropertiesMap(scope).values()) {
-            properties.add(property);
-        }
-        return properties;
+        return new HashSet<Property>(_properties.values());
     }
 
     /**
@@ -109,7 +72,7 @@ public class MockContext implements Context {
      */
     @Override
     public void removeProperty(Property property) {
-        getPropertiesMap(Scope.EXCHANGE).remove(property.getName());
+        _properties.remove(property.getName());
     }
 
     /**
@@ -117,15 +80,7 @@ public class MockContext implements Context {
      */
     @Override
     public void removeProperties() {
-        removeProperties(Scope.EXCHANGE);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void removeProperties(Scope scope) {
-        getPropertiesMap(scope).clear();
+        _properties.clear();
     }
 
     /**
@@ -133,23 +88,9 @@ public class MockContext implements Context {
      */
     @Override
     public Property setProperty(String name, Object val) {
-        return setProperty(name, val, Scope.EXCHANGE);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Property setProperty(String name, Object val, Scope scope) {
-        Map<String,Property> properties = getPropertiesMap(scope);
-        if (val != null) {
-            Property p = new MockProperty(name, val, scope);
-            properties.put(name, p);
-            return p;
-        } else {
-            properties.remove(name);
-            return null;
-        }
+        MockProperty property = new MockProperty(name, val, _scope);
+        _properties.put(name, property);
+        return property;
     }
 
     /**
@@ -158,14 +99,14 @@ public class MockContext implements Context {
     @Override
     public Context setProperties(Set<Property> properties) {
         for (Property property : properties) {
-            setProperty(property.getName(), property.getValue(), property.getScope());
+            setProperty(property.getName(), property.getValue());
         }
         return this;
     }
 
     @Override
     public Context copy() {
-        MockContext ctx = new MockContext(_exchangeProperties, _inProperties, _outProperties);
+        MockContext ctx = new MockContext(_properties);
         ctx.removeProperties(BehaviorLabel.TRANSIENT.label());
         return ctx;
     }

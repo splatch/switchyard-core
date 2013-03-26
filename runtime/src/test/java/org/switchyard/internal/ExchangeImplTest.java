@@ -36,7 +36,6 @@ import org.switchyard.HandlerException;
 import org.switchyard.Message;
 import org.switchyard.MockDomain;
 import org.switchyard.MockHandler;
-import org.switchyard.Scope;
 import org.switchyard.ServiceReference;
 import org.switchyard.event.EventObserver;
 import org.switchyard.metadata.InOutOperation;
@@ -109,23 +108,22 @@ public class ExchangeImplTest {
         ServiceReference service = _domain.createInOnlyService(new QName("IdTest"));
         Exchange exchange = service.createExchange();
         exchange.send(exchange.createMessage());
-        Assert.assertNotNull(exchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN));
+        Assert.assertNotNull(exchange.getMessage().getContext().getProperty(Exchange.MESSAGE_ID));
     }
     
     @Test
     public void testRelatesToSetOnReply() {
         ServiceReference service = _domain.createInOutService(
-                new QName("ReplyTest"), new MockHandler().forwardInToOut());
+            new QName("ReplyTest"), new MockHandler().forwardInToOut());
         MockHandler replyHandler = new MockHandler();
         Exchange exchange = service.createExchange(replyHandler);
-        exchange.send(exchange.createMessage());
-        String requestId = (String)exchange.getContext().getProperty(
-                Exchange.MESSAGE_ID, Scope.IN).getValue();
-        String replyId = (String)exchange.getContext().getProperty(
-                Exchange.MESSAGE_ID, Scope.OUT).getValue();
-        String replyRelatesTo = (String)exchange.getContext().getProperty(
-                Exchange.RELATES_TO, Scope.OUT).getValue();
-        
+        Message message = exchange.createMessage();
+        exchange.send(message);
+
+        String requestId = message.getContext().getPropertyValue(Exchange.MESSAGE_ID);
+        String replyId = exchange.getMessage().getContext().getPropertyValue(Exchange.MESSAGE_ID);
+        String replyRelatesTo = exchange.getMessage().getContext().getPropertyValue(Exchange.RELATES_TO);
+
         Assert.assertEquals(requestId, replyRelatesTo);
         Assert.assertFalse(requestId.equals(replyId));
     }

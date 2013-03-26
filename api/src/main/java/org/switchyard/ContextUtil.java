@@ -1,6 +1,6 @@
 /* 
  * JBoss, Home of Professional Open Source 
- * Copyright 2011 Red Hat Inc. and/or its affiliates and other contributors
+ * Copyright 2013 Red Hat Inc. and/or its affiliates and other contributors
  * as indicated by the @author tags. All rights reserved. 
  * See the copyright.txt in the distribution for a 
  * full listing of individual contributors.
@@ -16,33 +16,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
  * MA  02110-1301, USA.
  */
-
 package org.switchyard;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.HashSet;
+import java.util.Set;
 
-public class ScopeTest {
+/**
+ * Utility class for context's management.
+ */
+public class ContextUtil {
 
-    @Test
-    public void testActiveScopeIn() {
-        MockExchange exchange = new MockExchange().setPhase(ExchangePhase.IN);
-        Scope scope = Scope.activeScope(exchange);
-        Assert.assertEquals(Scope.IN, scope);
+    private ContextUtil() { }
+
+    /**
+     * Merge exchange and message properties.
+     *
+     * @param contexts Contexts to be merged.
+     * @return Properties from both contexts.
+     */
+    public static Set<Property> properties(Context ... contexts) {
+        Set<Property> props = new HashSet<Property>();
+        for (Context context : contexts) {
+            props.addAll(context.getProperties());
+        }
+        return props;
     }
-    
-    @Test
-    public void testActiveScopeOut() {
-        MockExchange exchange = new MockExchange().setPhase(ExchangePhase.OUT);
-        Scope scope = Scope.activeScope(exchange);
-        Assert.assertEquals(Scope.OUT, scope);
-    }
-    
-    @Test
-    public void testActiveScopeNullPhaseNoException() {
-        MockExchange exchange = new MockExchange();
-        Scope scope = Scope.activeScope(exchange);
-        // above should not throw an exception, returned scope should be null
-        Assert.assertNull(scope);
-    }
+
 }

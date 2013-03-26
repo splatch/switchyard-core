@@ -45,7 +45,19 @@ import javax.activation.DataSource;
  * </ul>
  */
 public interface Message {
-    
+
+    /**
+     * Retrieves the message context.
+     * @return the message context
+     */
+    Context getContext();
+
+    /**
+     * Override message context.
+     * @param context Message properties.
+     */
+    void setContext(Context context);
+
     /**
      * Assigns the specified content to the body of this message.
      *
@@ -94,4 +106,12 @@ public interface Message {
      * @return a map containing all message attachments
      */
     Map<String, DataSource> getAttachmentMap();
+
+    /**
+     * Be careful, transient message properties are not copied.
+     *
+     * @return copy of message.
+     */
+    Message copy();
+
 }

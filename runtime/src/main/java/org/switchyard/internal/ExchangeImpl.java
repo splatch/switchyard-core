@@ -19,6 +19,7 @@
 
 package org.switchyard.internal;
 
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -32,6 +33,7 @@ import org.switchyard.ExchangePattern;
 import org.switchyard.ExchangePhase;
 import org.switchyard.ExchangeState;
 import org.switchyard.Message;
+import org.switchyard.Property;
 import org.switchyard.Scope;
 import org.switchyard.Service;
 import org.switchyard.ServiceDomain;
@@ -65,14 +67,14 @@ public class ExchangeImpl implements SecurityExchange {
     private ServiceReference        _consumer;
     private Service                 _provider;
     private BaseExchangeContract    _contract = new BaseExchangeContract();
-    
+
     /**
      * Create a new exchange with no endpoints initialized.  At a minimum, the 
      * input endpoint must be set before sending an exchange.
      * @param domain service domain for this exchange
      */
     public ExchangeImpl(ServiceDomain domain) {
-        this(domain, null);        
+        this(domain, null);
     }
     
     /**
@@ -83,7 +85,7 @@ public class ExchangeImpl implements SecurityExchange {
     public ExchangeImpl(ServiceDomain domain, ExchangeHandler replyHandler) {
         _domain = domain;
         _replyHandler = replyHandler;
-        _context = new DefaultContext();
+        _context = new DefaultContext(Scope.EXCHANGE, new HashMap<String, Property>());
     }
 
     @Override
@@ -104,17 +106,18 @@ public class ExchangeImpl implements SecurityExchange {
     @Override
     public synchronized void send(Message message) {
         assertMessageOK(message);
-        
+
         // Set exchange phase
         if (_phase == null) {
             _phase = ExchangePhase.IN;
-            initInContentType();
+            initContentType(message);
         } else if (_phase.equals(ExchangePhase.IN)) {
             _phase = ExchangePhase.OUT;
-            initOutContentType();
+            initContentType(message);
             // set relatesTo header on OUT context
-            _context.setProperty(RELATES_TO, _context.getProperty(
-                    MESSAGE_ID, Scope.IN).getValue(), Scope.OUT).addLabels(BehaviorLabel.TRANSIENT.label());
+            Object propertyValue = _message.getContext().getPropertyValue(MESSAGE_ID);
+            message.getContext().setProperty(RELATES_TO, propertyValue)
+                .addLabels(BehaviorLabel.TRANSIENT.label());
         } else {
             throw new IllegalStateException(
                     "Send message not allowed for exchange in phase " + _phase);
@@ -135,10 +138,10 @@ public class ExchangeImpl implements SecurityExchange {
         _phase = ExchangePhase.OUT;
         _state = ExchangeState.FAULT;
         initFaultContentType();
-        
+
         // set relatesTo header on OUT context
-        _context.setProperty(RELATES_TO, _context.getProperty(
-                MESSAGE_ID, Scope.IN).getValue(), Scope.OUT).addLabels(BehaviorLabel.TRANSIENT.label());
+        message.getContext().setProperty(RELATES_TO, _message.getContext().getPropertyValue(MESSAGE_ID))
+            .addLabels(BehaviorLabel.TRANSIENT.label());
 
         sendInternal(message);
     }
@@ -186,7 +189,8 @@ public class ExchangeImpl implements SecurityExchange {
         
         _message = message;
         // assign messageId
-        _context.setProperty(MESSAGE_ID, UUID.randomUUID().toString(), Scope.activeScope(this)).addLabels(BehaviorLabel.TRANSIENT.label());
+        _message.getContext().setProperty(MESSAGE_ID, UUID.randomUUID().toString())
+            .addLabels(BehaviorLabel.TRANSIENT.label());
 
         if (_log.isDebugEnabled()) {
             _log.debug("Sending " + _phase + " Message (" + System.identityHashCode(message) + ") on " 
@@ -235,6 +239,9 @@ public class ExchangeImpl implements SecurityExchange {
         }
         if (_state == ExchangeState.FAULT) {
             throw new IllegalStateException("Exchange instance is in a FAULT state.");
+        }
+        if (message.getContext().getPropertyValue(MESSAGE_ID) != null) {
+            throw new IllegalStateException("Can not send same message instance twice, use copy() method instead");
         }
     }
 
@@ -298,19 +305,12 @@ public class ExchangeImpl implements SecurityExchange {
         _message = message;
     }
     
-    private void initInContentType() {
+    private void initContentType(Message message) {
         QName exchangeInputType = _contract.getConsumerOperation().getInputType();
 
         if (exchangeInputType != null) {
-            _context.setProperty(Exchange.CONTENT_TYPE, exchangeInputType, Scope.IN).addLabels(BehaviorLabel.TRANSIENT.label());
-        }
-    }
-
-    private void initOutContentType() {
-        
-        QName serviceOperationOutputType = _contract.getProviderOperation().getOutputType();
-        if (serviceOperationOutputType != null) {
-            _context.setProperty(Exchange.CONTENT_TYPE, serviceOperationOutputType, Scope.OUT).addLabels(BehaviorLabel.TRANSIENT.label());
+            message.getContext().setProperty(Exchange.CONTENT_TYPE, exchangeInputType)
+                .addLabels(BehaviorLabel.TRANSIENT.label());
         }
     }
 
@@ -318,11 +318,12 @@ public class ExchangeImpl implements SecurityExchange {
         if (_contract.getProviderOperation() != null) {
             QName serviceOperationFaultType = _contract.getProviderOperation().getFaultType();
             if (serviceOperationFaultType != null) {
-                _context.setProperty(Exchange.CONTENT_TYPE, serviceOperationFaultType, Scope.OUT).addLabels(BehaviorLabel.TRANSIENT.label());
+                _message.getContext().setProperty(Exchange.FAULT_TYPE, serviceOperationFaultType)
+                    .addLabels(BehaviorLabel.TRANSIENT.label());
             }
         }
     }
-    
+
     private boolean isDone(ExchangePhase phase) {
         ExchangePattern mep = _contract.getConsumerOperation().getExchangePattern();
         return (ExchangePhase.IN.equals(phase) && ExchangePattern.IN_ONLY.equals(mep))

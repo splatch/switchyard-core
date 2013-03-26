@@ -31,7 +31,6 @@ import org.switchyard.ExchangeHandler;
 import org.switchyard.HandlerException;
 import org.switchyard.Message;
 import org.switchyard.Property;
-import org.switchyard.Scope;
 
 /**
  * Half-baked message tracing implementation, used primarily as an example
@@ -65,16 +64,12 @@ public class MessageTrace implements ExchangeHandler {
             .append(indent(0) + "State -> " + exchange.getState());
         
         // Add context properties
-        Context ctx = exchange.getContext();
         summary.append(indent(0) + "Exchange Context -> ");
-        for (Property p : ctx.getProperties(Scope.EXCHANGE)) {
-            summary.append(indent(1) + p.getName() + " : " + p.getValue());
-        }
+        dumpContext(summary, exchange.getContext());
+
         summary.append(indent(0) + "Message Context -> ");
-        for (Property p : ctx.getProperties(Scope.valueOf(exchange.getPhase().toString()))) {
-            summary.append(indent(1) + p.getName() + " : " + p.getValue());
-        }
-        
+        dumpContext(summary, exchange.getMessage().getContext());
+
         // Add message content
         String content = null;
         try {
@@ -102,7 +97,13 @@ public class MessageTrace implements ExchangeHandler {
         return summary.toString();
     }
     
-    private String indent(int column) {
+    private void dumpContext(StringBuilder summary, Context context) {
+        for (Property property : context.getProperties()) {
+            summary.append(indent(1) + property.getName() + " : " + property.getValue());
+        }
+    }
+
+	private String indent(int column) {
         String indent = INDENT;
         if (column > 0) {
             for (int i = 0; i < column; i++) {

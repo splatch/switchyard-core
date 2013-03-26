@@ -25,7 +25,10 @@ import java.util.Map;
 import javax.activation.DataSource;
 import javax.xml.namespace.QName;
 
+import org.switchyard.Context;
 import org.switchyard.Message;
+import org.switchyard.Property;
+import org.switchyard.Scope;
 import org.switchyard.exception.SwitchYardException;
 import org.switchyard.metadata.java.JavaService;
 import org.switchyard.transform.Transformer;
@@ -38,9 +41,9 @@ public class DefaultMessage implements Message {
 
     private TransformerRegistry _transformerRegistry;
     private Object _content;
-    private Map<String, DataSource> _attachments = 
+    private Map<String, DataSource> _attachments =
         new HashMap<String, DataSource>();
-    
+    private Context _context = new DefaultContext(Scope.MESSAGE, new HashMap<String, Property>());
 
     /**
      * Create a new instance of DefaultMessage.
@@ -87,6 +90,16 @@ public class DefaultMessage implements Message {
     }
 
     @Override
+    public Context getContext() {
+        return _context;
+    }
+
+    @Override
+    public void setContext(Context context) {
+        _context = context;
+    }
+
+    @Override
     public <T> T getContent(final Class<T> type) {
         if (type == null) {
             throw new IllegalArgumentException("null 'type' argument.");
@@ -124,4 +137,16 @@ public class DefaultMessage implements Message {
         _content = content;
         return this;
     }
+
+    @Override
+    public Message copy() {
+        DefaultMessage message = new DefaultMessage();
+        Context copy = getContext().copy();
+        message.getContext().setProperties(copy.getProperties());
+        if (_transformerRegistry != null) {
+            message.setTransformerRegistry(_transformerRegistry);
+        }
+        return message.setContent(_content);
+    }
+
 }

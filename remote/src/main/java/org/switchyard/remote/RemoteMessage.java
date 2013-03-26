@@ -21,6 +21,9 @@ package org.switchyard.remote;
 import javax.xml.namespace.QName;
 
 import org.switchyard.Context;
+import org.switchyard.Scope;
+import org.switchyard.internal.DefaultContext;
+import org.switchyard.internal.DefaultMessage;
 import org.switchyard.serial.graph.AccessType;
 import org.switchyard.serial.graph.Strategy;
 
@@ -28,15 +31,24 @@ import org.switchyard.serial.graph.Strategy;
  * Serializable container for context and content used in an invocation.
  */
 @Strategy(access=AccessType.FIELD)
-public class RemoteMessage {
+public class RemoteMessage extends DefaultMessage {
 
-    private Context _context;
     private Object _content;
     private QName _service;
     private QName _domain;
     private String _operation;
     private boolean _fault;
-    
+    private Context _context = new DefaultContext(Scope.MESSAGE);
+
+    @Override
+    public void setContext(Context context) {
+        _context = context;
+    }
+
+    @Override
+    public Context getContext() {
+        return _context;
+    }
     /**
      * Create an empty remote message.
      */
@@ -53,43 +65,18 @@ public class RemoteMessage {
         _domain = domain;
         _service = service;
     }
-    
-    /**
-     * Returns the context properties for the invocation.
-     * @return context properties
-     */
-    public Context getContext() {
-        return _context;
-    }
-    
-    /**
-     * Specifies the context properties for the invocation.
-     * @param context context properties
-     * @return a reference to this RemoteMessage
-     */
-    public RemoteMessage setContext(Context context) {
-        _context = context;
-        return this;
-    }
-    
-    /**
-     * Returns the content for the invocation.
-     * @return the message content
-     */
+
+    @Override
     public Object getContent() {
         return _content;
     }
-    
-    /**
-     * Specifies the content for the invocation.
-     * @param content message content
-     * @return a reference to this RemoteMessage
-     */
+
+    @Override
     public RemoteMessage setContent(Object content) {
         _content = content;
         return this;
     }
-    
+
     /**
      * Returns the service name for the invocation.
      * @return the service name

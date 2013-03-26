@@ -31,8 +31,8 @@ import org.junit.Test;
 import org.switchyard.BaseHandler;
 import org.switchyard.Exchange;
 import org.switchyard.HandlerException;
+import org.switchyard.Message;
 import org.switchyard.MockDomain;
-import org.switchyard.Scope;
 import org.switchyard.Service;
 import org.switchyard.ServiceDomain;
 import org.switchyard.ServiceReference;
@@ -71,17 +71,18 @@ public class ExchangeDispatcherTest {
         Service service = new MockService(name, new InOnlyService(), sink);
         ServiceReference reference = new ServiceReferenceImpl(name, new InOnlyService(), null);
         Dispatcher dispatch = _provider.createDispatcher(reference);
-        
+
         ExchangeImpl exchange = new ExchangeImpl(_domain);
         exchange.consumer(reference, reference.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.provider(service, service.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.setOutputDispatcher(dispatch);
-        exchange.send(exchange.createMessage());
+        Message message = exchange.createMessage();
+        exchange.send(message);
         Thread.sleep(200);
-        
+
         Assert.assertEquals(
-                exchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN), 
-                sink.getLastExchange().getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN));
+                message.getContext().getProperty(Exchange.MESSAGE_ID), 
+                sink.getLastExchange().getMessage().getContext().getProperty(Exchange.MESSAGE_ID));
     }
     
 
@@ -101,13 +102,14 @@ public class ExchangeDispatcherTest {
         exchange.consumer(reference, reference.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.provider(service, service.getInterface().getOperation(ServiceInterface.DEFAULT_OPERATION));
         exchange.setOutputDispatcher(dispatch);
-        exchange.send(exchange.createMessage());
+        Message message = exchange.createMessage();
+        exchange.send(message);
         Thread.sleep(400);
-        
+
         Assert.assertNotNull(outHandler.getLastExchange());
         Assert.assertEquals(
-                exchange.getContext().getProperty(Exchange.MESSAGE_ID, Scope.IN).getValue(), 
-                outHandler.getLastExchange().getContext().getProperty(Exchange.RELATES_TO, Scope.OUT).getValue());
+                message.getContext().getPropertyValue(Exchange.MESSAGE_ID), 
+                outHandler.getLastExchange().getMessage().getContext().getPropertyValue(Exchange.RELATES_TO));
     }
     
 }

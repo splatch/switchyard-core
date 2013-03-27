@@ -21,6 +21,8 @@ package org.switchyard.internal;
 
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import javax.xml.namespace.QName;
@@ -124,6 +126,18 @@ public class ExchangeImpl implements SecurityExchange {
         }
 
         sendInternal(message);
+    }
+
+    @Override
+    public Future<Message> sendAsync(final Message message) {
+        Callable<Message> task = new Callable<Message>() {
+            @Override
+            public Message call() throws Exception {
+                send(message);
+                return getMessage();
+            }
+        };
+        return _domain.getExecutorService().submit(task);
     }
 
     @Override

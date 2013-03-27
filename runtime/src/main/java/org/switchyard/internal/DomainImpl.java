@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 import javax.xml.namespace.QName;
 
@@ -73,7 +74,9 @@ public class DomainImpl implements ServiceDomain {
     private Map<String, Object> _attachements = Collections.synchronizedMap(new LinkedHashMap<String, Object>());
     private Map<QName, ServiceReference> _references =
             new ConcurrentHashMap<QName, ServiceReference>();
-    
+
+    private ExecutorService _executorService = new SynchronousExecutorService();
+
     /**
      * Create a new ServiceDomain.
      * @param name name
@@ -235,6 +238,11 @@ public class DomainImpl implements ServiceDomain {
      */
     public ExchangeBus getBus() {
         return _exchangeBus;
+    }
+    
+    @Override
+    public ExecutorService getExecutorService() {
+        return _executorService;
     }
     
     @Override

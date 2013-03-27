@@ -22,6 +22,7 @@ package org.switchyard;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
 
 import javax.xml.namespace.QName;
 
@@ -192,5 +193,6 @@ public interface ServiceDomain {
      */
     void destroy();
 
+    ExecutorService getExecutorService();
 
 }

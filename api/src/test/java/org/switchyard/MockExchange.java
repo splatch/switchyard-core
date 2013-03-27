@@ -19,6 +19,9 @@
 
 package org.switchyard;
 
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+
 import org.switchyard.metadata.ExchangeContract;
 import org.switchyard.metadata.ServiceOperation;
 
@@ -74,6 +77,15 @@ public class MockExchange implements Exchange {
     }
 
     @Override
+    public Future<Message> sendAsync(Message message) {
+        return new FutureTask<Message>(new Runnable() {
+            @Override
+            public void run() {
+            }
+        }, message);
+    }
+
+    @Override
     public void sendFault(Message message) {
         // NOP
     }
@@ -124,4 +136,5 @@ public class MockExchange implements Exchange {
         _provider = provider;
         return this;
     }
+
 }

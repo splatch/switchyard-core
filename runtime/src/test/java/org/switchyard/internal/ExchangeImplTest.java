@@ -20,12 +20,17 @@
 package org.switchyard.internal;
 
 import java.util.EventObject;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.xml.namespace.QName;
 
 import junit.framework.Assert;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.switchyard.BaseHandler;
 import org.switchyard.Exchange;
@@ -129,6 +134,61 @@ public class ExchangeImplTest {
     }
 
     @Test
+    @Ignore // remove when domain will support real asynchronous call
+    public void testSendAsync() throws Exception {
+        final AtomicBoolean hold = new AtomicBoolean(true);
+        MockHandler replyHandler = new MockHandler();
+        ServiceReference service = _domain.createInOutService(new QName("InOutAsync"), new ExchangeHandler() {
+            @Override
+            public void handleMessage(Exchange exchange) throws HandlerException {
+                while (hold.get()) {
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        throw new HandlerException(e);
+                    }
+                }
+                exchange.send(exchange.createMessage().setContent("R E P L Y"));
+            }
+            @Override
+            public void handleFault(Exchange exchange) {
+            }
+        });
+
+        Exchange exchange = service.createExchange(replyHandler);
+        Future<Message> reply = exchange.sendAsync(exchange.createMessage());
+
+        Assert.assertFalse(reply.isDone());
+        try {
+            reply.get(1, TimeUnit.SECONDS);
+            Assert.fail("Unexpected completion of exchange");
+        } catch (TimeoutException e) {
+            e.getMessage(); // everything is good - exception is expected
+        }
+
+        hold.compareAndSet(true, false);
+        Message message = reply.get(); // here we should receive message just after task completes
+        Assert.assertTrue(reply.isDone());
+        Assert.assertNotNull(message);
+        Assert.assertEquals("R E P L Y", message.getContent());
+    }
+
+    @Test
+    public void testFuture() throws Exception {
+        MockHandler replyHandler = new MockHandler();
+        ServiceReference service = _domain.createInOutService(new QName("InOutAsync"), new MockHandler().forwardInToOut());
+
+        Exchange exchange = service.createExchange(replyHandler);
+        Object content = "request";
+        Future<Message> reply = exchange.sendAsync(exchange.createMessage().setContent(content));
+
+        Assert.assertTrue(reply.isDone());
+        Message message = reply.get(); // here we should receive message just after task completes
+        Assert.assertNotNull(message);
+        Assert.assertEquals(content, message.getContent());
+    }
+
+    @Test
     public void testNullSend() {
         Exchange exchange = new ExchangeImpl(_domain);
         try {
@@ -196,13 +256,13 @@ public class ExchangeImplTest {
         ExchangeHandler provider = new BaseHandler() {
             public void handleMessage(Exchange exchange) {
                 Assert.assertEquals(
-                		exchange.getMessage().getContent(), 
+                        exchange.getMessage().getContent(), 
                         inMsgContent);
                 
                 Message outMsg = exchange.createMessage();
                 outMsg.setContent(outMsgContent);
                 try {
-                	exchange.send(outMsg);
+                    exchange.send(outMsg);
                 }
                 catch (Exception ex) {
                     Assert.fail(ex.toString());
@@ -213,7 +273,7 @@ public class ExchangeImplTest {
         ExchangeHandler consumer = new BaseHandler() {
             public void handleMessage(Exchange exchange) {
                 Assert.assertEquals(
-                		exchange.getMessage().getContent(), 
+                        exchange.getMessage().getContent(), 
                         outMsgContent);
             }
         };

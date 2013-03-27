@@ -18,6 +18,8 @@
  */
 package org.switchyard;
 
+import java.util.concurrent.Future;
+
 import org.switchyard.metadata.ExchangeContract;
 import org.switchyard.metadata.ServiceOperation;
 
@@ -124,6 +126,17 @@ public interface Exchange {
      * @param message message to send
      */
     void send(Message message);
+
+    /**
+     * Sends the specified message as part of this message exchange without blocking the call.
+     * <p/>
+     * Implementations must throw an {@link IllegalStateException} if this method is
+     * called when the Exchange {@link #getState() state} is in {@link ExchangeState#FAULT}.
+     * 
+     * @param message message to send
+     * @return Future pointer to reply message.
+     */
+    Future<Message> sendAsync(Message message);
 
     /**
      * Sends the specified message as part of this message exchange.

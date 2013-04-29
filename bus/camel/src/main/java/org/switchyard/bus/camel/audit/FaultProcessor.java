@@ -28,7 +28,6 @@ import org.apache.camel.processor.DelegateAsyncProcessor;
 import org.apache.log4j.Logger;
 import org.switchyard.HandlerException;
 import org.switchyard.bus.camel.CamelExchange;
-import org.switchyard.common.lang.Strings;
 
 /**
  * Processor which catches {@link HandlerException} before calling processor.
@@ -80,26 +79,6 @@ public class FaultProcessor extends DelegateAsyncProcessor {
             + "This exception can not be handled, thus it's marked as handled and only logged. "
             + "If you don't want see messages like this consider handling "
             + "exceptions in your handler logic", throwable);
-    }
-
-    protected void dumpExceptionContents(Throwable throwable) {
-        if (_logger.isDebugEnabled()) {
-            String message = "Caught exception of type %s with message: %s";
-            String causeTrace = "";
-
-            if (throwable.getCause() != null) {
-                String causedBy = "\n%sCaused by exception of type %s, message: %s";
-                Throwable cause = throwable.getCause();
-                int depth = 0;
-                while (cause != null) {
-                    causeTrace += String.format(causedBy, Strings.repeat("  ", ++depth), cause.getClass().getName(), cause.getMessage());
-                    cause = cause.getCause();
-                }
-            }
-
-            _logger.debug(String.format(message, throwable.getClass().getName(), throwable.getMessage()) + causeTrace, throwable);
-        }
-
     }
 
     @Override

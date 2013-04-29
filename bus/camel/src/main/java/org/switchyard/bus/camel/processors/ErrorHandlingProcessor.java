@@ -26,12 +26,10 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.util.ExchangeHelper;
 import org.apache.log4j.Logger;
-import org.switchyard.ExchangePattern;
 import org.switchyard.ExchangeState;
 import org.switchyard.HandlerException;
 import org.switchyard.bus.camel.CamelExchange;
 import org.switchyard.bus.camel.ErrorListener;
-import org.switchyard.common.lang.Strings;
 
 /**
  * Processor put at the beginning of OnExceptionDefinition which turns state of
@@ -49,9 +47,7 @@ public class ErrorHandlingProcessor implements Processor {
         CamelExchange ex = new CamelExchange(exchange);
         if (ex.getState() != ExchangeState.FAULT) {
             Exception exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-            dumpExceptionContents(exception, ex.getContract().getConsumerOperation().getExchangePattern());
             notifyListeners(exchange.getContext(), ex, exception);
-
             Throwable content = detectHandlerException(exception);
             ex.sendFault(ex.createMessage().setContent(content));
             ExchangeHelper.setFailureHandled(exchange);
@@ -65,28 +61,7 @@ public class ErrorHandlingProcessor implements Processor {
         return new HandlerException(throwable);
     }
 
-    protected void dumpExceptionContents(Throwable throwable, ExchangePattern pattern) {
-        String message = String.format("Caught exception of type %s with message: %s", throwable.getClass().getName(), throwable.getMessage());
-        String causeTrace = "";
-
-        if (throwable.getCause() != null) {
-            String causedBy = "\n%sCaused by exception of type %s, message: %s";
-            Throwable cause = throwable.getCause();
-            int depth = 0;
-            while (cause != null) {
-                causeTrace += String.format(causedBy, Strings.repeat("  ", ++depth), cause.getClass().getName(), cause.getMessage());
-                cause = cause.getCause();
-            }
-        }
-
-        if (pattern == ExchangePattern.IN_ONLY) {
-            LOG.error(message + causeTrace, throwable);
-        } else {
-            LOG.debug(message + causeTrace, throwable);
-        }
-    }
-
-    protected void notifyListeners(CamelContext context, org.switchyard.Exchange exchange, Throwable exception) {
+    private void notifyListeners(CamelContext context, org.switchyard.Exchange exchange, Throwable exception) {
         Map<String, ErrorListener> listeners = context.getRegistry().lookupByType(ErrorListener.class);
         if (listeners != null && listeners.size() > 0) {
             for (Entry<String, ErrorListener> entry : listeners.entrySet()) {

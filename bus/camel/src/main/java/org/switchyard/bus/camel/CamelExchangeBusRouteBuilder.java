@@ -38,11 +38,13 @@ import org.apache.camel.builder.ErrorHandlerBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.ExpressionNode;
 import org.apache.camel.model.FilterDefinition;
-import org.apache.camel.model.OnExceptionDefinition;
 import org.apache.camel.model.RouteDefinition;
+import org.apache.camel.model.TryDefinition;
 import org.apache.camel.spi.InterceptStrategy;
 import org.switchyard.ExchangePattern;
 import org.switchyard.bus.camel.audit.AuditInterceptStrategy;
+import org.switchyard.bus.camel.audit.FaultInterceptStrategy;
+import org.switchyard.bus.camel.audit.StepwiseInterceptStrategy;
 import org.switchyard.exception.SwitchYardException;
 import org.switchyard.metadata.ServiceOperation;
 
@@ -92,7 +94,9 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
         }
 
         // add default intercept strategy using @Audit annotation
+        definition.addInterceptStrategy(new FaultInterceptStrategy());
         definition.addInterceptStrategy(new AuditInterceptStrategy());
+        definition.addInterceptStrategy(new StepwiseInterceptStrategy());
 
         Map<String, InterceptStrategy> interceptStrategies = getContext().getRegistry().lookupByType(InterceptStrategy.class);
         if (interceptStrategies != null) {
@@ -104,13 +108,20 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
             }
         }
 
-        OnExceptionDefinition onException = new OnExceptionDefinition(Throwable.class);
-        onException.processRef(ERROR_HANDLING.name());
-        onException.addOutput(createFilterDefinition());
-        // register exception closure
-        definition.addOutput(onException);
+        definition.onException(Throwable.class)
+            .log("EXCEPTION ${exception.message} handled by error handler");
+//        TryDefinition exceptionHandleTry = definition.onException(Exception.class)
+//            .continued(true)
+//            .handled(true)
+//            .processRef(ERROR_HANDLING.name())
+//            .doTry();
+//        exceptionHandleTry.processRef(TRANSACTION_HANDLER.name())
+//            .addOutput(createFilterDefinition());
+//        exceptionHandleTry.doCatch(Exception.class)
+//            .processRef(FATAL_ERROR.name());
 
-        definition
+        TryDefinition tryDefinition = definition.doTry();
+        tryDefinition
             .processRef(DOMAIN_HANDLERS.name())
             .processRef(ADDRESSING.name())
             .processRef(TRANSACTION_HANDLER.name())
@@ -120,6 +131,10 @@ public class CamelExchangeBusRouteBuilder extends RouteBuilder {
             .processRef(TRANSFORMATION.name())
             .processRef(VALIDATION.name())
             .processRef(PROVIDER_CALLBACK.name())
+            .processRef(TRANSACTION_HANDLER.name())
+            .addOutput(createFilterDefinition());
+        tryDefinition.doCatch(Exception.class)
+            .processRef(ERROR_HANDLING.name())
             .processRef(TRANSACTION_HANDLER.name())
             .addOutput(createFilterDefinition());
     }
